@@ -1,17 +1,20 @@
 import React from 'react';
 import './App.css';
 
-import moment from "moment";
-
 import { CALENDAR_ID, GOOGLE_CLIENT_ID } from "./config.js";
 
 import { TagCloud } from "react-tagcloud";
+
+import { DateTime } from "luxon";
+
+import IntervalTree from '@flatten-js/interval-tree'
 
 class App extends React.Component{
   constructor(props) {
     super(props)
     this.state = {
-      events: []
+      events: [],
+      eventCount: 0,
     }
   }
 
@@ -44,19 +47,51 @@ class App extends React.Component{
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
           'singleEvents': true,
-          'maxResults': 100,
+          'maxResults': 1500,
           'orderBy': 'startTime',
+          'fields': 'nextPageToken,etag,timeZone,summary'+
+                     ',items(etag,id,htmlLink,summary,description'+
+                     ',start,end,extendedProperties)',
           'q': this.state.searchTerm
         }).then( (response) => {
 
+
+      let responseTz = response.result.timeZone;
+      let toMillis = (event, fieldName) => {
+        let value = event[fieldName];
+        return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
+      };
+
       let events = response.result.items
+      let intervals = new IntervalTree();
+
+      events.forEach((event) => {
+        event.conflicts = [];
+        let start = toMillis(event, 'start')
+        let end = toMillis(event, 'end')
+        let interval = [start, end - 1];
+        event.start.ms = start;
+        event.end.ms = end;
+        intervals.search(interval).forEach( (e) => {
+          event.conflicts.push(e.id);
+          e.conflicts.push(event.id);
+        });
+
+        intervals.insert(interval, event);
+      });
+
+      let conflictedEvents = events.filter(e => {return e.conflicts.length > 0;});
+
       console.log("Got event count: " + events.length);
+      console.log("Events with conflicts count: " + conflictedEvents.length);
       that.setState({
-        events
+        events: conflictedEvents,
+        intervals: intervals,
+        eventCount: events.length,
       }, ()=>{
         console.log(that.state.events);
-      })
-    }, function(reason) {
+      });
+    }, (reason) => {
       console.log(reason);
     });
   }
@@ -64,7 +99,6 @@ class App extends React.Component{
   doSearch = (event) => {
     console.log("Want to search for '"+event.target.value+"'")
     this.setState({searchTerm: event.target.value},
-
        this.getEvents);
   }
 
@@ -73,19 +107,21 @@ class App extends React.Component{
   render() {
     const tags = {};
 
-    const { events } = this.state;
+    const { events, eventCount } = this.state;
 
-    events.forEach(function(e) {
+    events.forEach((e) => {
       //  [A-Za-z0-9 \-_.\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]
 
-        e.summary.split(/[^A-Za-z0-9\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]/).forEach(function(u) {
+        e.summary.split(/[^A-Za-z0-9\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]/).forEach((u) => {
             const count = tags[u] || 0;
             tags[u] = count + 1;
         });
     });
 
+    delete tags[""];
+
     const data = []
-    Object.keys(tags).forEach(function(key) {
+    Object.keys(tags).forEach((key) => {
       const count = tags[key];
       if (count > 5 ) {
         data.push({value: key, count: tags[key]})
@@ -103,21 +139,22 @@ class App extends React.Component{
                 onClick={tag => alert(`'${tag.value}' was selected!`)} />
     );
 
-    let eventsList = <ul> { events.map(function(event) {
+    let eventsList = <ul>
+     {events.length} / {eventCount} events has conflicts
+     { events.map((event) => {
       return (
         <li key={event.id}>
-        {event.summary}{" "}
+        {event.conflicts.length} - {event.summary}{" "}
           (<a
             href={event.htmlLink}
-            target="_blank"
-	    rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
           >
-            {moment(event.start.dateTime).format("h:mm a")},{" "}
-            {moment(event.end.dateTime).diff(
-                  moment(event.start.dateTime),
+            {DateTime.fromMillis(event.start.ms).toFormat("h:mm a").toString()},{" "}
+            {DateTime.fromMillis(event.end.ms).diff(
+                  DateTime.fromMillis(event.start.ms),
                   "minutes"
-                )}{" "}
-            minutes, {moment(event.start.dateTime).format("MMMM Do")}{" "}
+                ).toFormat("mm")}{" "}
+            minutes, {DateTime.fromMillis(event.start.ms).toFormat("MMMM Do")}{" "}
             </a>)
           </li>
       );
@@ -146,7 +183,7 @@ class App extends React.Component{
 
         <div>
           <SimpleCloud/>
-          <h1>Upcoming Events</h1>
+          <h1>Upcoming Conflicts</h1>
           <div>
             {this.state.isLoading && loadingState}
             {events.length > 0 && eventsList}
