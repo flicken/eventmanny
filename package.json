@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@flatten-js/interval-tree": "^1.0.10",
-    "luxon": "^1.22.0",
+    "luxon": "^1.22.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "^3.4.1",
