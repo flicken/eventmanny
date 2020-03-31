@@ -2,23 +2,25 @@ import React from 'react';
 import './App.css';
 
 import { CALENDAR_ID, GOOGLE_CLIENT_ID } from "./config.js";
+import EventList from "./EventList";
+import WithLoading from "./WithLoading";
+
 
 import { TagCloud } from "react-tagcloud";
-
 import { DateTime } from "luxon";
+import IntervalTree from '@flatten-js/interval-tree';
 
-import IntervalTree from '@flatten-js/interval-tree'
+
+const EventListWithLoading = WithLoading(EventList);
 
 class App extends React.Component{
   constructor(props) {
     super(props)
-    this.state = {
-      events: [],
-      eventCount: 0,
-    }
+    this.state = { events: [], eventCount: 0, loading: true};
   }
 
   componentDidMount = () => {
+    this.setState({ loading: true });
     // 1. Load the JavaScript client library.
     window.gapi.load("client", this.initClient);
   }
@@ -85,6 +87,8 @@ class App extends React.Component{
       console.log("Got event count: " + events.length);
       console.log("Events with conflicts count: " + conflictedEvents.length);
       that.setState({
+        loading: false,
+        allEvents: events,
         events: conflictedEvents,
         intervals: intervals,
         eventCount: events.length,
@@ -139,59 +143,10 @@ class App extends React.Component{
                 onClick={tag => alert(`'${tag.value}' was selected!`)} />
     );
 
-    let eventsList = <ul>
-     {events.length} / {eventCount} events has conflicts
-     { events.map((event) => {
-      return (
-        <li key={event.id}>
-        {event.conflicts.length} - {event.summary}{" "}
-          (<a
-            href={event.htmlLink}
-            target="_blank" rel="noopener noreferrer"
-          >
-            {DateTime.fromMillis(event.start.ms).toFormat("h:mm a").toString()},{" "}
-            {DateTime.fromMillis(event.end.ms).diff(
-                  DateTime.fromMillis(event.start.ms),
-                  "minutes"
-                ).toFormat("mm")}{" "}
-            minutes, {DateTime.fromMillis(event.start.ms).toFormat("MMMM Do")}{" "}
-            </a>)
-          </li>
-      );
-    }) }
-    </ul>;
-
-    let emptyState = (
-      <div className="empty">
-        <h3>
-        Empty
-        </h3>
-      </div>
-    );
-
-    let loadingState = (
-      <div className="loading">
-        Loading...
-      </div>
-    );
-
-    return (
-      <div className="container">
-      <form>
-        <input type="text" placeholder="Search" onChange={this.doSearch}/>
-      </form>
-
-        <div>
-          <SimpleCloud/>
-          <h1>Upcoming Conflicts</h1>
-          <div>
-            {this.state.isLoading && loadingState}
-            {events.length > 0 && eventsList}
-            {this.state.isEmpty && emptyState}
-          </div>
-        </div>
-      </div>
-    );
+    return (<div>
+      <SimpleCloud/>
+      <EventListWithLoading isLoading={this.state.loading} events={events} eventCount={eventCount} title="Conflicts"/>
+    </div>);
   }
 }
 
