@@ -42,21 +42,22 @@ class App extends React.Component{
     });
   };
 
-  getEvents() {
+  nextPage(nextPageToken, count){
     let that = this;
+    console.log(nextPageToken)
     window.gapi.client.calendar.events.list({
           'calendarId': CALENDAR_ID,
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
           'singleEvents': true,
-          'maxResults': 1500,
+          'maxResults': 100,
           'orderBy': 'startTime',
           'fields': 'nextPageToken,etag,timeZone,summary'+
                      ',items(etag,id,htmlLink,summary,description'+
                      ',start,end,extendedProperties)',
+          'pageToken': nextPageToken,
           'q': this.state.searchTerm
         }).then( (response) => {
-
 
       let responseTz = response.result.timeZone;
       let toMillis = (event, fieldName) => {
@@ -64,7 +65,9 @@ class App extends React.Component{
         return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
       };
 
-      let events = response.result.items
+      let events = nextPageToken ?
+        this.state.events.concat(response.result.items) :
+        response.result.items;
       let intervals = new IntervalTree();
 
       events.forEach((event) => {
@@ -93,11 +96,21 @@ class App extends React.Component{
         intervals: intervals,
         eventCount: events.length,
       }, ()=>{
-        console.log(that.state.events);
+        //console.log(that.state.events);
+        if (response.result.nextPageToken) {
+          this.nextPage(response.result.nextPageToken)
+        } else {
+          console.log("Skipping ")
+          console.log(response.result.nextPageToken)
+        }
       });
     }, (reason) => {
       console.log(reason);
     });
+  }
+
+  getEvents() {
+    this.nextPage()
   }
 
   doSearch = (event) => {
