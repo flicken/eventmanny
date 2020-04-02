@@ -43,7 +43,7 @@ function EventList(props) {
 
         return (
           <div key={event.id}>
-        <ListItem  button component="a" alignItems="flex-start" onClick={() => console.log(event)}>
+        <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>props.onClick(e, event)}>
         <ListItemAvatar>
           <Avatar alt={event.summary} src="doesnotexist.jpg" />
         </ListItemAvatar>
