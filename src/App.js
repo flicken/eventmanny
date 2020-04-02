@@ -9,12 +9,33 @@ import { TagCloud } from "react-tagcloud";
 import IntervalTree from '@flatten-js/interval-tree';
 import { DateTime } from "luxon";
 
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  },
+}));
+
 const EventListWithLoading = WithLoading(EventList);
 
 class App extends React.Component{
   constructor(props) {
     super(props)
-    this.state = { conflictedEvents: [], events: [], eventCount: 0, loading: true};
+    this.state = {
+      conflictedEvents: [],
+      eventsConflicting: [],
+      events: [],
+      eventCount: 0,
+      loading: true
+    };
     this.fetcher = new EventFetcher()
   }
 
@@ -65,10 +86,25 @@ class App extends React.Component{
        this.fetcher.fetch(this.addEvents));
   }
 
+  handleEventClick = (e, event) => {
+    console.log("Trying to filter by event")
+    console.log(event)
+    console.log(e)
+
+    this.setState((state, props) => {
+      let eventsConflicting = state.events.filter((e) => event.conflicts.includes(e.id));
+      return {
+        focusedEvent: event,
+        eventsConflicting
+      };
+    }
+    )
+  }
+
   render() {
     const tags = {};
 
-    const { conflictedEvents, eventCount } = this.state;
+    const { eventsConflicting, conflictedEvents, eventCount, events } = this.state;
 
     conflictedEvents.forEach((e) => {
       //  [A-Za-z0-9 \-_.\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]
@@ -97,8 +133,19 @@ class App extends React.Component{
     );
 
     return (<div>
-      <SimpleCloud/>
-      <EventListWithLoading isLoading={this.state.loading} events={conflictedEvents} eventCount={eventCount} title="Conflicts"/>
+      <Grid container spacing={3}>
+        <Grid item xs={6}>
+          <EventListWithLoading
+          onClick={(e, event) => this.handleEventClick(e, event)}
+          isLoading={this.state.loading}
+          events={conflictedEvents}
+          eventCount={eventCount}
+          title="Events With Conflicts"/>
+        </Grid>
+        <Grid item xs={6}>
+          <EventListWithLoading isLoading={this.state.loading} events={eventsConflicting} eventCount={eventCount} title="Conflicts"/>
+        </Grid>
+      </Grid>
     </div>);
   }
 }
