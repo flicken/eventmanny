@@ -84,9 +84,9 @@ function EventList(props) {
         <div>
           <h1>{title}</h1>
           <div>
-            {props.children}
             {events.length > 0 && eventsList}
             {events.length === 0 && emptyState}
+            {props.children}
           </div>
         </div>
       </div>

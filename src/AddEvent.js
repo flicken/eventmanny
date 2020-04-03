@@ -7,9 +7,10 @@ export default function AddEvent(props) {
 
   return (
     <form onSubmit={handleSubmit(props.onSubmit)}>
-      <input type="text" name="summary" ref={register({ required: true })}/>
+      <input type="text" name="summary" ref={register({ required: true })} size="40"/>
       <input name="datetimes" ref={register({ required: true })} placeholder="e.g. Monday, 11-12"/>
-      <input type="submit" />
+      <input name="submitted" type="hidden" value={false}/>
+      <div tabindex="0" onFocus={handleSubmit(props.onSubmit)}/>
     </form>
   )
 
