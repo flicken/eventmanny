@@ -5,9 +5,11 @@
   "dependencies": {
     "@flatten-js/interval-tree": "^1.0.10",
     "@material-ui/core": "^4.9.8",
+    "chrono-node": "^1.4.4",
     "luxon": "^1.22.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-hook-form": "^5.2.0",
     "react-scripts": "^3.4.1",
     "react-tagcloud": "^2.0.0"
   },

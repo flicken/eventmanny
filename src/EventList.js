@@ -43,7 +43,7 @@ function EventList(props) {
 
         return (
           <div key={event.id}>
-        <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>props.onClick(e, event)}>
+        <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>props.onClick && props.onClick(e, event)}>
         <ListItemAvatar>
           <Avatar alt={event.summary} src="doesnotexist.jpg" />
         </ListItemAvatar>
@@ -71,7 +71,6 @@ function EventList(props) {
       </List>
     </div>
 
-
     let emptyState = (
       <div className="empty">
         <h3>
@@ -85,6 +84,7 @@ function EventList(props) {
         <div>
           <h1>{title}</h1>
           <div>
+            {props.children}
             {events.length > 0 && eventsList}
             {events.length === 0 && emptyState}
           </div>

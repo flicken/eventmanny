@@ -1,17 +1,19 @@
 import React from 'react';
 import './App.css';
 
+import AddEvent from "./AddEvent";
+
 import EventList from "./EventList";
 import WithLoading from "./WithLoading";
 import EventFetcher from "./EventFetcher";
 
-import { TagCloud } from "react-tagcloud";
 import IntervalTree from '@flatten-js/interval-tree';
 import { DateTime } from "luxon";
 
 import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+
+import chrono from "chrono-node";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const EventListWithLoading = WithLoading(EventList);
+const GridWithLoading = WithLoading(Grid);
 
 class App extends React.Component{
   constructor(props) {
@@ -32,6 +34,7 @@ class App extends React.Component{
     this.state = {
       conflictedEvents: [],
       eventsConflicting: [],
+      recentEvents: [],
       events: [],
       eventCount: 0,
       loading: true
@@ -49,25 +52,28 @@ class App extends React.Component{
     return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
   }
 
+  handleEvent = (intervals, responseTz, event) => {
+    event.conflicts = [];
+    let start = this.toMillis(event, 'start', responseTz)
+    let end = this.toMillis(event, 'end', responseTz)
+    let interval = [start, end - 1];
+    event.start.ms = start;
+    event.end.ms = end;
+    intervals.search(interval).forEach( (e) => {
+      console.log("Found conflict: " + e)
+      event.conflicts.push(e.id);
+      e.conflicts.push(event.id);
+    });
+
+    intervals.insert(interval, event);
+  }
+
   addEvents = ({newEvents, responseTz}) => {
     this.setState((state, props) => {
       let events = state.events.concat(newEvents)
       let intervals = new IntervalTree();
 
-      events.forEach((event) => {
-        event.conflicts = [];
-        let start = this.toMillis(event, 'start', responseTz)
-        let end = this.toMillis(event, 'end', responseTz)
-        let interval = [start, end - 1];
-        event.start.ms = start;
-        event.end.ms = end;
-        intervals.search(interval).forEach( (e) => {
-          event.conflicts.push(e.id);
-          e.conflicts.push(event.id);
-        });
-
-        intervals.insert(interval, event);
-      });
+      events.forEach((event) => this.handleEvent(intervals, responseTz, event));
 
       let conflictedEvents = events.filter(e => {return e.conflicts.length > 0;});
 
@@ -77,6 +83,7 @@ class App extends React.Component{
         conflictedEvents: conflictedEvents,
         intervals: intervals,
         eventCount: events.length,
+        responseTz: responseTz
       };
     });
   }
@@ -101,52 +108,128 @@ class App extends React.Component{
     )
   }
 
-  render() {
-    const tags = {};
-
-    const { eventsConflicting, conflictedEvents, eventCount, events } = this.state;
-
-    conflictedEvents.forEach((e) => {
-      //  [A-Za-z0-9 \-_.\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]
-
-        e.summary.split(/[^A-Za-z0-9\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF]/).forEach((u) => {
-            const count = tags[u] || 0;
-            tags[u] = count + 1;
-        });
-    });
-
-    delete tags[""];
-
-    const data = []
-    Object.keys(tags).forEach((key) => {
-      const count = tags[key];
-      if (count > 5 ) {
-        data.push({value: key, count: tags[key]})
+  toDatetime = (components, other) => {
+    if (!components) {
+      if (other.date) {
+        return other;
+      } else {
+        return {
+          dateTime: DateTime.fromISO(other.dateTime).plus({ hours: 1 })
+        }
       }
-    });
+    }
+    let values = {...components.impliedValues, ...components.knownValues}
+    let d = DateTime.fromObject({
+      year: values.year,
+      month: values.month,
+      day: values.day,
+      hour: values.hour,
+      minute: values.minute,
+      second: values.second
+    })
 
-    const SimpleCloud = () => (
-      <TagCloud minSize={12}
-                maxSize={35}
-                tags={data}
-                onClick={tag => alert(`'${tag.value}' was selected!`)} />
-    );
+    if (components.knownValues.hour) {
+      return {
+        dateTime: d.toISO()
+      }
+    } else {
+      return {
+        date: d.toISODate()
+      }
+    }
+  }
 
-    return (<div>
-      <Grid container spacing={3}>
-        <Grid item xs={6}>
-          <EventListWithLoading
-          onClick={(e, event) => this.handleEventClick(e, event)}
-          isLoading={this.state.loading}
-          events={conflictedEvents}
-          eventCount={eventCount}
-          title="Events With Conflicts"/>
-        </Grid>
-        <Grid item xs={6}>
-          <EventListWithLoading isLoading={this.state.loading} events={eventsConflicting} eventCount={eventCount} title="Conflicts"/>
-        </Grid>
+  handleAddEvent = (input) => {
+    console.log(input)
+
+    let datetimes = chrono.parse(input.datetimes, new Date(), { forwardDate: true })
+    console.log(datetimes)
+
+    let start = this.toDatetime(datetimes[0].start)
+    console.log(start)
+    let end = this.toDatetime(datetimes[0].end, start)
+    console.log(end)
+
+
+    const event = {
+      summary: input.summary,
+      start: start,
+      end: end
+    }
+
+    console.log(event)
+
+    this.fetcher.insert(event, (createdEvent) => {
+      console.log("Event created")
+      console.log(createdEvent)
+      this.setState(({intervals, events, responseTz}, {props}) => {
+        this.handleEvent(intervals, responseTz, createdEvent)
+        console.log(createdEvent)
+        return {
+          events: [...events, createdEvent]
+        }
+      }
+    )
+    })
+  }
+
+  render() {
+    const { eventsConflicting, conflictedEvents, eventCount,
+      events} = this.state;
+
+    const conflicts =
+    <GridWithLoading container isLoading={this.state.loading} spacing={3}>
+     <Grid item xs={6}>
+            <EventList
+              onClick={(e, event) => this.handleEventClick(e, event)}
+              events={conflictedEvents}
+              eventCount={eventCount}
+              title="Events With Conflicts"
+            />
       </Grid>
-    </div>);
+        <Grid item xs={6}>
+          <EventList
+            events={eventsConflicting}
+            eventCount={eventCount}
+            title="Conflicts"
+           />
+        </Grid>
+    </GridWithLoading>
+
+    let recent = new DateTime({}).minus({days: 1})
+    let recentEvents = events.filter(e => {
+      let created = DateTime.fromISO(e.created)
+      let a = created.diff(recent)
+      return a.valueOf() > 0
+    })
+
+    const recentEventIds = new Set(recentEvents.map(e => e.id))
+    const conflictingIds = new Set(recentEvents.flatMap(e => e.conflicts).filter(id => !recentEventIds.has(id)))
+
+    const creation = <Grid container spacing={3}>
+    <Grid item xs={6}>
+           <EventList
+             onClick={(e, event) => this.handleEventClick(e, event)}
+             events={recentEvents}
+             eventCount={eventCount}
+             title="Recent events"
+           >
+              <AddEvent onSubmit={this.handleAddEvent}/>
+           </EventList>
+
+         </Grid>
+         <GridWithLoading isLoading={this.state.loading} item xs={6}>
+           <EventList
+             events={events.filter(e => conflictingIds.has(e.id))}
+             eventCount={eventCount}
+             title="Conflict with"
+            />
+         </GridWithLoading>
+    </Grid>
+
+    return (
+      creation
+      )
   }
 }
 
