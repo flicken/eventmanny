@@ -1,5 +1,5 @@
 
-import { CALENDAR_ID, GOOGLE_API_KEY,  GOOGLE_CLIENT_ID, } from "./config.js";
+import { CALENDAR_ID,  GOOGLE_CLIENT_ID, } from "./config.js";
 
 class EventFetcher {
 
@@ -72,7 +72,6 @@ class EventFetcher {
 
     return window.gapi.client
       .init({
-        apiKey: GOOGLE_API_KEY,
         clientId: GOOGLE_CLIENT_ID,
         discoveryDocs: DISCOVERY_DOCS,
         scope: SCOPES
