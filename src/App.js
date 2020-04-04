@@ -34,7 +34,6 @@ class App extends React.Component{
     this.state = {
       conflictedEvents: [],
       eventsConflicting: [],
-      recentEvents: [],
       events: [],
       eventCount: 0,
       loading: true
@@ -107,6 +106,19 @@ class App extends React.Component{
     }
     )
   }
+
+  handleDeleteClick = (e, event) => {
+    console.log("Trying to delete event")
+    console.log(event)
+    console.log(e)
+    this.fetcher.delete(event, () => this.setState((state, props) => {
+      let eventsWithThisEvent = state.events.filter((e) => e.id !== event.id);
+      return {
+        events: eventsWithThisEvent
+      }
+    }))
+  }
+
 
   toDatetime = (components, other) => {
     if (!components) {
@@ -210,6 +222,7 @@ class App extends React.Component{
     <Grid item xs={6}>
            <EventList
              onClick={(e, event) => this.handleEventClick(e, event)}
+             onDelete={(e, event) => this.handleDeleteClick(e, event)}
              events={recentEvents}
              eventCount={eventCount}
              title="Recent events"

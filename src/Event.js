@@ -11,6 +11,10 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 
+import Badge from '@material-ui/core/Badge';
+import EventBusy from '@material-ui/icons/Event';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -27,15 +31,29 @@ function showTime(event) {
   if (event.start.date) {
     return "All day"
   } else {
+
     // TODO handle multi-day events
     return DateTime.fromMillis(event.start.ms).toLocaleString(DateTime.TIME_SIMPLE) + " - " + DateTime.fromMillis(event.end.ms).toLocaleString(DateTime.TIME_SIMPLE)
   }
 }
 
+function DeleteButton(props) {
+  let handleClick = e => {
+    e.stopPropagation()
+    props.onClick(e, props.event)
+  }
 
+  return <DeleteIcon {...props} onClick={handleClick} />
+}
 
-export default function Event({event, onClick}) {
+export default function Event({event, onClick, onDelete}) {
   const classes = useStyles()
+
+  let warningBadge = event.conflicts.length === 0 ? null :
+   <Badge badgeContent={event.conflicts.length} max={99} color="primary">
+    <EventBusy />
+  </Badge>
+
   return (
     <React.Fragment>
   <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
@@ -58,6 +76,9 @@ export default function Event({event, onClick}) {
         </React.Fragment>
       }
     />
+    <DeleteButton event={event} onClick={onDelete}/>
+    {warningBadge}
+
   </ListItem>
   <Divider />
   </React.Fragment>

@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 function EventList(props) {
 
     const classes = useStyles()
-    const { events, eventCount, title, onClick } = props;
+    const { events, eventCount, title, onClick, onDelete } = props;
 
     let eventsList = <div>
      {events.length} / {eventCount} events shown
@@ -35,7 +35,7 @@ function EventList(props) {
        { events.map((event) => {
 
         return (
-          <Event key={event.id} event={event} onClick={onClick}/ >
+          <Event key={event.id} event={event} onClick={onClick} onDelete={onDelete}/ >
       )
     })}
       </List>

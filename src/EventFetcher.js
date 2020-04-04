@@ -18,6 +18,17 @@ class EventFetcher {
     });
   }
 
+  delete(event, callback) {
+    const request = window.gapi.client.calendar.events.delete({
+      'calendarId': CALENDAR_ID,
+      'eventId': event.id
+    });
+
+    request.execute(function(e) {
+      callback(e)
+    });
+  }
+
   fetch({callback}) {
     this.ensureAuthenticated().then(() => this.start(callback))
   }
