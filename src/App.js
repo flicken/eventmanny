@@ -186,6 +186,7 @@ class App extends React.Component{
   }
 
   render() {
+    const classes = useStyles();
     const { eventsConflicting, conflictedEvents, eventCount,
       events} = this.state;
 
@@ -218,7 +219,7 @@ class App extends React.Component{
     const recentEventIds = new Set(recentEvents.map(e => e.id))
     const conflictingIds = new Set(recentEvents.flatMap(e => e.conflicts).filter(id => !recentEventIds.has(id)))
 
-    const creation = <Grid container spacing={3}>
+    const creation = <Grid className={classes.root} container spacing={3}>
     <Grid item xs={6}>
            <EventList
              onClick={(e, event) => this.handleEventClick(e, event)}
@@ -241,7 +242,7 @@ class App extends React.Component{
     </Grid>
 
     return (
-      creation
+      true ? creation : conflicts
       )
   }
 }

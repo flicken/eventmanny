@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 
 export default function AddEvent(props) {
   var summaryInput = null
-  const { register, handleSubmit, watch, errors } = useForm()
+  const { register, handleSubmit } = useForm()
 
   return (
     <form onSubmit={handleSubmit(props.onSubmit)}>
@@ -13,7 +13,4 @@ export default function AddEvent(props) {
       <div tabIndex="0" onFocus={(a) => {handleSubmit(props.onSubmit)(a); summaryInput.focus(); summaryInput.select()}}/>
     </form>
   )
-
-  return <form>
-  </form>
 }
