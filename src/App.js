@@ -15,6 +15,8 @@ import Grid from '@material-ui/core/Grid';
 
 import chrono from "chrono-node";
 
+import { BrowserRouter, Route, Link } from "react-router-dom";
+
 const useStyles = theme => ({
   root: {
     flexGrow: 1,
@@ -245,8 +247,23 @@ class App extends React.Component{
     </Grid>
 
     return (
-      true ? creation : conflicts
-      )
+      <BrowserRouter initialEntries={['/conflicts']} initialIndex={0}>
+        <div className={classes.root}>
+          <Route exact path='/'>
+          <nav>
+            <Link to="/create" >Create</Link>  |
+            <Link to="/conflicts">Conflicts</Link>
+          </nav>
+          </Route>
+          <Route path='/create'>
+            {creation}
+          </Route>
+          <Route path='/conflicts'>
+            {conflicts}
+          </Route>
+        </div>
+      </BrowserRouter>
+    )
   }
 }
 
