@@ -10,12 +10,12 @@ import EventFetcher from "./EventFetcher";
 import IntervalTree from '@flatten-js/interval-tree';
 import { DateTime } from "luxon";
 
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
 import chrono from "chrono-node";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = theme => ({
   root: {
     flexGrow: 1,
   },
@@ -24,11 +24,12 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
-}));
+  });
 
 const GridWithLoading = WithLoading(Grid);
 
 class App extends React.Component{
+
   constructor(props) {
     super(props)
     this.state = {
@@ -186,12 +187,13 @@ class App extends React.Component{
   }
 
   render() {
-    const classes = useStyles();
+    const { classes } = this.props;
+
     const { eventsConflicting, conflictedEvents, eventCount,
       events} = this.state;
 
     const conflicts =
-    <GridWithLoading container isLoading={this.state.loading} spacing={3}>
+    <GridWithLoading className={classes.root} container isLoading={this.state.loading} spacing={3}>
      <Grid item xs={6}>
             <EventList
               onClick={(e, event) => this.handleEventClick(e, event)}
@@ -247,4 +249,4 @@ class App extends React.Component{
   }
 }
 
-export default App;
+export default withStyles(useStyles)(App)
