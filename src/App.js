@@ -37,7 +37,8 @@ class App extends React.Component{
       eventsConflicting: [],
       events: [],
       eventCount: 0,
-      loading: true
+      loading: true,
+      intervals: new IntervalTree(),
     };
     this.fetcher = new EventFetcher()
   }
