@@ -11,6 +11,8 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 
+import Event from "./Event"
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -22,19 +24,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function showTime(event) {
-  if (event.start.date) {
-    return "All day"
-  } else {
-    // TODO handle multi-day events
-    return DateTime.fromMillis(event.start.ms).toLocaleString(DateTime.TIME_SIMPLE) + " - " + DateTime.fromMillis(event.end.ms).toLocaleString(DateTime.TIME_SIMPLE)
-  }
-}
-
 function EventList(props) {
 
     const classes = useStyles()
-    const { events, eventCount, title } = props;
+    const { events, eventCount, title, onClick } = props;
 
     let eventsList = <div>
      {events.length} / {eventCount} events shown
@@ -42,30 +35,7 @@ function EventList(props) {
        { events.map((event) => {
 
         return (
-          <div key={event.id}>
-        <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>props.onClick && props.onClick(e, event)}>
-        <ListItemAvatar>
-          <Avatar alt={event.summary} src="doesnotexist.jpg" />
-        </ListItemAvatar>
-          <ListItemText
-            primary={event.summary}
-            secondary={
-              <React.Fragment>
-              <Typography
-                component="span"
-                variant="body2"
-                className={classes.inline}
-                color="textPrimary"
-              >
-              {DateTime.fromMillis(event.start.ms).toLocaleString(DateTime.DATE_SIMPLE)}{" "}
-              {showTime(event)}
-              </Typography>
-              </React.Fragment>
-            }
-          />
-        </ListItem>
-        <Divider />
-        </div>
+          <Event key={event.id} event={event} onClick={onClick}/ >
       )
     })}
       </List>
