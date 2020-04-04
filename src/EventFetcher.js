@@ -79,7 +79,7 @@ class EventFetcher {
 
   initClient = () => {
     var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-    var SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events profile"
+    var SCOPES = "https://www.googleapis.com/auth/calendar.events.readonly"
 
     return window.gapi.client
       .init({
