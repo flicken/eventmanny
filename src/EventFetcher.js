@@ -87,7 +87,11 @@ class EventFetcher {
     if (!window.gapi.client || window.gapi.auth2) {
       console.log("loading client")
       const promise = new Promise(function(resolve, reject) {
-        window.gapi.load("auth2:client", resolve);
+        try {
+          window.gapi.load("auth2:client", resolve);
+        } catch(e) {
+          reject(e)
+        }
       });
 
       return promise
