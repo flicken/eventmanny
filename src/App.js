@@ -207,7 +207,7 @@ class App extends React.Component{
               onClick={(e, event) => this.handleEventClick(e, event)}
               events={conflictedEvents}
               eventCount={eventCount}
-              title="Events With Conflicts"
+              title="Has Conflicts"
             />
       </Grid>
         <Grid item xs={6}>
@@ -246,7 +246,7 @@ class App extends React.Component{
              onDelete={(e, event) => this.handleDeleteClick(e, event)}
              events={recentEvents}
              eventCount={eventCount}
-             title="Recent events"
+             title="Recently created"
            >
               <AddEvent onSubmit={this.handleAddEvent}/>
            </EventList>
