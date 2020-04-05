@@ -55,13 +55,18 @@ class App extends React.Component{
     return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
   }
 
-  handleEvent = (intervals, responseTz, event) => {
+  addComputedFields = (responseTz, event) => {
     event.conflicts = [];
     let start = this.toMillis(event, 'start', responseTz)
     let end = this.toMillis(event, 'end', responseTz)
     let interval = [start, end - 1];
     event.start.ms = start;
     event.end.ms = end;
+  }
+
+  handleEvent = (intervals, responseTz, event) => {
+    this.addComputedFields(responseTz, event)
+    let interval = [event.start.ms, event.end.ms - 1];
     intervals.search(interval).forEach( (e) => {
       console.log("Found conflict: " + e)
       event.conflicts.push(e.id);
@@ -214,12 +219,22 @@ class App extends React.Component{
         </Grid>
     </GridWithLoading>
 
-    let recent = new DateTime({}).minus({days: 1})
+    let now = new DateTime({})
+    let recent = now.minus({days: 1})
     let recentEvents = events.filter(e => {
       let created = DateTime.fromISO(e.created)
       let a = created.diff(recent)
       return a.valueOf() > 0
     })
+
+    let aWeekAgo = now.minus({days: 7})
+    let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
+    let updatedEventIds = new Set(events.filter(e =>
+      DateTime.fromISO(e.updated).diff(aWeekAgo).valueOf() > 0 &&
+      DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
+    ).map(e => e.id))
+    let updatedEvents = events.filter(e => updatedEventIds.has(e.id))
+    let conflictWithUpdatedEventIds = new Set(updatedEvents.flatMap(e => e.conflicts).filter(id => !updatedEventIds.has(id)))
 
     const recentEventIds = new Set(recentEvents.map(e => e.id))
     const conflictingIds = new Set(recentEvents.flatMap(e => e.conflicts).filter(id => !recentEventIds.has(id)))
@@ -252,7 +267,8 @@ class App extends React.Component{
           <Route exact path='/'>
           <nav>
             <Link to="/create" >Create</Link>  |
-            <Link to="/conflicts">Conflicts</Link>
+            <Link to="/conflicts"> Conflicts</Link> |
+            <Link to="/updates"> Recent Updates</Link>
           </nav>
           </Route>
           <Route path='/create'>
@@ -260,6 +276,29 @@ class App extends React.Component{
           </Route>
           <Route path='/conflicts'>
             {conflicts}
+          </Route>
+          <Route path='/updates'>
+            <Grid className={classes.root} container spacing={3}>
+              <Grid item xs={6}>
+                   <EventList
+                     onClick={(e, event) => this.handleEventClick(e, event)}
+                     onDelete={(e, event) => this.handleDeleteClick(e, event)}
+                     events={updatedEvents}
+                     eventCount={eventCount}
+                     title="Recent updates for month"
+                   >
+                      <AddEvent onSubmit={this.handleAddEvent}/>
+                   </EventList>
+
+                 </Grid>
+                 <GridWithLoading isLoading={this.state.loading} item xs={6}>
+                   <EventList
+                     events={events.filter(e => conflictWithUpdatedEventIds.has(e.id))}
+                     eventCount={eventCount}
+                     title="Conflict with"
+                    />
+                 </GridWithLoading>
+            </Grid>
           </Route>
         </div>
       </BrowserRouter>

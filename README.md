@@ -5,12 +5,14 @@ Bring a bit of structure to your chaotic schedule.
 
 Features
 --------
- * Easy entering of multiple events
- * See conflicts for recently entered events
+ * Create: Easy entering of multiple events
+ * Conflicts: See conflicts for recently entered events
+ * Recent updates: See recent (past week) updates for events in the next month.
+     This is to support syncing recent changes to a paper calendar
 
 TODO
 ----
- * View for "recent updates" (configurable time in past)
+ * Configurable time for "recent" updates
  * Grouping of events (e.g. concert series or rehearsals that are related,
       but not regularly scheduled)
  * Easy exception handling (e.g. school is out, so no regularly scheduled

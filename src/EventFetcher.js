@@ -1,5 +1,6 @@
 
 import { CALENDAR_ID,  GOOGLE_CLIENT_ID, } from "./config.js";
+import { DateTime } from "luxon";
 
 class EventFetcher {
 
@@ -30,13 +31,36 @@ class EventFetcher {
   }
 
   fetch({callback}) {
-    this.ensureAuthenticated().then(() => this.start(callback))
+    this.ensureAuthenticated().then(() => this.start(callback, "events"))
   }
 
-  start = (callback) => {
+  fetchUpdatedIdsOnly({callback, since}) {
+    let now = new DateTime({})
+    let aBitLater = now.plus({days: 3})
+    let timeMax = aBitLater.plus({month: 1}).startOf("month")
+    console.log(`Finding updates for events from ${now} to ${timeMax} since ${since}`)
+    console.log(since)
     let request = {
           'calendarId': CALENDAR_ID,
-          'timeMin': (new Date()).toISOString(),
+          'timeMin': now.toISO(),
+          'timeMax': timeMax.toISO(),
+          'updatedMin': since.toISO(),
+          'showDeleted': true,
+          'singleEvents': true,
+          'maxResults': 100,
+          'orderBy': 'updated',
+          'fields': 'nextPageToken,etag'+
+                     ',items(id)'
+          }
+
+    this.ensureAuthenticated()
+      .then(() => this.nextPage({request, callback, count: 0, name: "updates"}))
+  }
+
+  start = (callback, name) => {
+    let request = {
+          'calendarId': CALENDAR_ID,
+          'timeMin': new DateTime({}).toISO(),
           'showDeleted': false,
           'singleEvents': true,
           'maxResults': 100,
@@ -45,7 +69,7 @@ class EventFetcher {
                      ',items(etag,id,htmlLink,summary,description'+
                      ',start,end,updated,created,extendedProperties)'
           }
-    this.nextPage({request, callback, count: 0})
+    this.nextPage({request, callback, count: 0, name: name})
   }
 
   initSignedOnCallback = () => {
@@ -89,14 +113,14 @@ class EventFetcher {
       })
   };
 
-  nextPage = ({request, callback, count}) => {
+  nextPage = ({request, callback, count, name}) => {
     window.gapi.client.calendar.events.list(request).then((response) => {
         let responseTz = response.result.timeZone;
         let newEvents = response.result.items;
         let totalEventCount = count + newEvents.length
         let hasMore = !!response.result.nextPageToken
 
-        console.log("Got new events: " + newEvents.length);
+        console.log(`Got new ${name} events: ${newEvents.length}`);
 
         callback({
           loading: false,
@@ -107,15 +131,16 @@ class EventFetcher {
         });
 
         if (response.result.nextPageToken) {
-          console.log("Fetching next page");
+          console.log(`Fetching next ${name} page`);
           this.nextPage({request: {
               ...request,
               pageToken: response.result.nextPageToken
             },
             callback,
-            count: totalEventCount});
+            count: totalEventCount,
+            name: name});
         } else {
-          console.log("Done, no more pages");
+          console.log(`Done, no more ${name} pages`);
           console.log(response.result.nextPageToken);
         }
       })
