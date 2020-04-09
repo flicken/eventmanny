@@ -84,7 +84,7 @@ class EventFetcher {
   }
 
   ensureAuthenticated = (callback) => {
-    if (!window.gapi.client || window.gapi.auth2) {
+    if (!window.gapi.client || !window.gapi.auth2) {
       console.log("loading client")
       const promise = new Promise(function(resolve, reject) {
         try {
