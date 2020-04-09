@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@flatten-js/interval-tree": "^1.0.10",
+    "@flatten-js/interval-tree": "^1.0.11",
     "@material-ui/core": "^4.9.9",
     "@material-ui/icons": "^4.9.1",
     "chrono-node": "^1.4.4",
