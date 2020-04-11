@@ -360,6 +360,7 @@ class App extends React.Component{
           <div>
             Suggestions and feature requests on Github <a href="https://github.com/flicken/eventmanny">flicken/eventmanny</a>.  Current TODOs:
           <ul>
+            <li>Select (multiple) calendars</li>
             <li>Configurable time for "recent" updates</li>
             <li>Grouping of events (e.g. concert series or rehearsals that are related, but not regularly scheduled)</li>
             <li>Easy exception handling (e.g. school is out, so no regularly scheduled events)</li>

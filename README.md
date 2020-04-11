@@ -12,6 +12,7 @@ Features
 
 TODO
 ----
+ * Select (multiple) calendars
  * Configurable time for "recent" updates
  * Grouping of events (e.g. concert series or rehearsals that are related,
       but not regularly scheduled)
