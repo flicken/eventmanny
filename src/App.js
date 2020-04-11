@@ -300,6 +300,7 @@ class App extends React.Component{
     console.log(SCOPES)
 
     const tabs = [
+      {label: "Home", path: "/"},
       {label: "Conflicts", path: "/conflicts"},
       {label: "Create", path: "/create"},
       {label: "Updates", path: "/updates"},
@@ -307,7 +308,7 @@ class App extends React.Component{
 
     return (
       <div>
-    <BrowserRouter initialEntries={['/conflicts']} initialIndex={0}>
+    <BrowserRouter initialIndex={0}>
         <div className={classes.root}>
             <AppBar position="static">
           <Toolbar>
@@ -317,11 +318,11 @@ class App extends React.Component{
               tabs.map(
                 ({label, path})=><Tab key={label}
                                       label={label}
-                                      className={{
-    display:"flex",
-    alignItems:"center",
-    justifyContent:"center"
-}}
+                                      style={{
+                                          display:"flex",
+                                          alignItems:"center",
+                                          justifyContent:"center"
+                                      }}
                                       component={Link}
                                       to={path} />
               )
@@ -349,6 +350,13 @@ class App extends React.Component{
 
           {signInError && <div>Sign on error: {signInError}</div>}
           <Route exact path='/'>
+          <div>Bring a bit of structure to your chaotic schedule.</div>
+          <ul>
+            <li><Link to="/create" onClick={() => this.setState({tabValue: 1})}>Create</Link> events easily</li>
+            <li><Link to="/conflicts" onClick={() => this.setState({tabValue: 2})}>Conflicts</Link> shown for recently entered events</li>
+            <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar for past week, so you can sync to a paper calendar</li>
+          </ul>
+
           </Route>
           <Route path='/create'>
             {creation}
