@@ -357,6 +357,17 @@ class App extends React.Component{
             <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar for past week, so you can sync to a paper calendar</li>
           </ul>
 
+          <div>
+            Suggestions and feature requests on Github <a href="https://github.com/flicken/eventmanny">flicken/eventmanny</a>.  Current TODOs:
+          <ul>
+            <li>Configurable time for "recent" updates</li>
+            <li>Grouping of events (e.g. concert series or rehearsals that are related, but not regularly scheduled)</li>
+            <li>Easy exception handling (e.g. school is out, so no regularly scheduled events)</li>
+            <li>Attach image to events / series (e.g. picture of poster for concert series)</li>
+            <li>Even easier entering of series (e.g. concert series that has mostly the same info, but different dates, times, location, headline acts, etc)</li>
+          </ul>
+          </div>
+
           </Route>
           <Route path='/create'>
             {creation}
