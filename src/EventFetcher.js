@@ -1,11 +1,15 @@
 
-import { CALENDAR_ID,  GOOGLE_CLIENT_ID, } from "./config.js";
+import { CALENDAR_ID} from "./config.js";
 import { DateTime } from "luxon";
 
 class EventFetcher {
 
   constructor(props) {
-    this.isSignedOnCallback = props && props.isSignedOnCallback
+    this.auth = props && props.auth;
+  }
+
+  setAuth(auth) {
+    this.auth = auth;
   }
 
   insert(event, callback) {
@@ -72,48 +76,32 @@ class EventFetcher {
     this.nextPage({request, callback, count: 0, name: name})
   }
 
-  initSignedOnCallback = () => {
-    let isSignedIn = window.gapi.auth2.getAuthInstance().isSignedIn
-    if (!isSignedIn.get()) {
-      window.gapi.auth2.getAuthInstance().signIn();
-    }
-    if (this.isSignedOnCallback) {
-      this.isSignedOnCallback(isSignedIn.get())
-      isSignedIn.listen(this.isSignedOnCallback)
-    }
-  }
-
   ensureAuthenticated = (callback) => {
-    if (!window.gapi.client || !window.gapi.auth2) {
+    if (!window.gapi.client) {
       console.log("loading client")
       const promise = new Promise(function(resolve, reject) {
         try {
           window.gapi.load("auth2:client", resolve);
         } catch(e) {
+          console.log("Rejected")
+          console.log(e)
           reject(e)
         }
       });
 
       return promise
-        .then(() => this.initClient())
-        .then(() => this.initSignedOnCallback());
+        .then(() => this.initClient());
     } else {
       console.log("Gapi client already loaded")
-      return this.initClient()
-        .then(() => this.initSignedOnCallback());
+      return this.initClient();
     }
   }
 
 
   initClient = () => {
-    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-    var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly"
-
     return window.gapi.client
       .init({
-        clientId: GOOGLE_CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
-        scope: SCOPES
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
       })
   };
 

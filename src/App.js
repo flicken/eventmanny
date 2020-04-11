@@ -12,10 +12,19 @@ import { DateTime } from "luxon";
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Toolbar from '@material-ui/core/Toolbar';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+
 
 import chrono from "chrono-node";
 
 import { BrowserRouter, Route, Link } from "react-router-dom";
+
+import { GoogleLogin, GoogleLogout } from 'react-google-login';
+
+import { GOOGLE_CLIENT_ID, } from "./config.js";
 
 const useStyles = theme => ({
   root: {
@@ -30,24 +39,43 @@ const useStyles = theme => ({
 
 const GridWithLoading = WithLoading(Grid);
 
+const emptyState = {
+  conflictedEvents: [],
+  eventsConflicting: [],
+  events: [],
+  eventCount: 0,
+  loading: true,
+  intervals: new IntervalTree(),
+  isSignedIn: false,
+  signInError: null,
+  tabValue: 0,
+}
+
 class App extends React.Component{
 
   constructor(props) {
     super(props)
-    this.state = {
-      conflictedEvents: [],
-      eventsConflicting: [],
-      events: [],
-      eventCount: 0,
-      loading: true,
-      intervals: new IntervalTree(),
-    };
+    this.state = emptyState;
     this.fetcher = new EventFetcher()
   }
 
-  componentDidMount = () => {
-    this.setState({ loading: true });
+  onLoginSuccess = (response) => {
+    this.setState({isSignedIn: true, signInError: null})
+    console.log("Logged in")
+    console.log(response)
+    this.fetcher.setAuth(response.tokenObj)
     this.fetcher.fetch({callback: this.addEvents})
+  }
+
+  onLogoutSuccess = (response) => {
+    this.setState(emptyState)
+    console.log("Logged out")
+    console.log(response)
+  }
+
+  onLoginFailure = (response) => {
+    this.setState({isSignedIn: false, signInError: response})
+    console.log(`Error logging in ${response}`)
   }
 
   toMillis = (event, fieldName, responseTz) => {
@@ -59,7 +87,6 @@ class App extends React.Component{
     event.conflicts = [];
     let start = this.toMillis(event, 'start', responseTz)
     let end = this.toMillis(event, 'end', responseTz)
-    let interval = [start, end - 1];
     event.start.ms = start;
     event.end.ms = end;
   }
@@ -194,11 +221,17 @@ class App extends React.Component{
     })
   }
 
+  handleChange = (event, newValue) => {
+    console.log(event)
+    console.log(newValue)
+    this.setState({tabValue: newValue});
+  };
+
   render() {
     const { classes } = this.props;
 
-    const { eventsConflicting, conflictedEvents, eventCount,
-      events} = this.state;
+    const { isSignedIn, signInError, eventsConflicting, conflictedEvents, eventCount,
+      events, tabValue} = this.state;
 
     const conflicts =
     <GridWithLoading className={classes.root} container isLoading={this.state.loading} spacing={3}>
@@ -261,15 +294,61 @@ class App extends React.Component{
          </GridWithLoading>
     </Grid>
 
+    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+    var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly profile email"
+    console.log(DISCOVERY_DOCS)
+    console.log(SCOPES)
+
+    const tabs = [
+      {label: "Conflicts", path: "/conflicts"},
+      {label: "Create", path: "/create"},
+      {label: "Updates", path: "/updates"},
+    ]
+
     return (
-      <BrowserRouter initialEntries={['/conflicts']} initialIndex={0}>
+      <div>
+    <BrowserRouter initialEntries={['/conflicts']} initialIndex={0}>
         <div className={classes.root}>
+            <AppBar position="static">
+          <Toolbar>
+
+          <Tabs value={tabValue} onChange={this.handleChange} variant="fullWidth">
+            {
+              tabs.map(
+                ({label, path})=><Tab key={label}
+                                      label={label}
+                                      className={{
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center"
+}}
+                                      component={Link}
+                                      to={path} />
+              )
+            }
+          </Tabs>
+          <div style={{flexGrow: 1}}/>
+              { isSignedIn ?
+                <GoogleLogout
+                    clientId={GOOGLE_CLIENT_ID}
+                    buttonText="Logout"
+                    onLogoutSuccess={this.onLogoutSuccess}
+                  /> : <GoogleLogin
+                      clientId={GOOGLE_CLIENT_ID}
+                      buttonText="Login"
+                      onSuccess={this.onLoginSuccess}
+                      onFailure={this.onLoginFailure}
+                     isSignedIn={true}
+                      scope = {SCOPES}
+                      discoveryDocs = {DISCOVERY_DOCS}
+                      cookiePolicy={'single_host_origin'}
+                    />
+              }
+            </Toolbar>
+          </AppBar>
+
+          {signInError && <div>Sign on error: {signInError}</div>}
           <Route exact path='/'>
-          <nav>
-            <Link to="/create" >Create</Link>  |
-            <Link to="/conflicts"> Conflicts</Link> |
-            <Link to="/updates"> Recent Updates</Link>
-          </nav>
           </Route>
           <Route path='/create'>
             {creation}
@@ -302,6 +381,7 @@ class App extends React.Component{
           </Route>
         </div>
       </BrowserRouter>
+      </div>
     )
   }
 }
