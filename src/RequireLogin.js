@@ -4,14 +4,18 @@ import { GOOGLE_CLIENT_ID } from "./config.js";
 import { GoogleLogin } from 'react-google-login';
 
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-const SCOPES =
-  "https://www.googleapis.com/auth/calendar.readonly " +
-  "https://www.googleapis.com/auth/calendar.events.readonly " +
-  "https://www.googleapis.com/auth/calendar.events " +
-  "profile email"
+
+const CALENDAR_READONLY = "https://www.googleapis.com/auth/calendar.readonly"
+const EVENTS_READONLY = "https://www.googleapis.com/auth/calendar.events.readonly"
+const EVENTS_READWRITE = "https://www.googleapis.com/auth/calendar.events"
+const SCOPES = [
+//  CALENDAR_READONLY, // not needed until feature for selecting calendar
+  EVENTS_READONLY,
+  EVENTS_READWRITE,
+  "profile",
+  "email"].join(" ")
 
 export default function ({isSignedIn, children, onSuccess, onFailure}) {
-
   if (isSignedIn) {
     return children || <></>;
   } else {
