@@ -281,7 +281,7 @@ class App extends React.Component{
              onDelete={(e, event) => this.handleDeleteClick(e, event)}
              events={recentEvents}
              eventCount={eventCount}
-             title="Recently created"
+             title="Recently new"
            >
               <AddEvent onSubmit={this.handleAddEvent}/>
            </EventList>
@@ -300,7 +300,7 @@ class App extends React.Component{
     const tabs = [
       {label: "Home", path: "/"},
       {label: "Conflicts", path: "/conflicts"},
-      {label: "Create", path: "/create"},
+      {label: "New", path: "/new"},
       {label: "Updates", path: "/updates"},
     ]
 
@@ -346,7 +346,7 @@ class App extends React.Component{
           <Route exact path='/'>
           <div>Bring a bit of structure to your chaotic schedule.</div>
           <ul>
-            <li><Link to="/create" onClick={() => this.setState({tabValue: 1})}>Create</Link> events easily</li>
+            <li><Link to="/new" onClick={() => this.setState({tabValue: 1})}>New</Link> events, easily created</li>
             <li><Link to="/conflicts" onClick={() => this.setState({tabValue: 2})}>Conflicts</Link> shown for recently entered events</li>
             <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar for past week, so you can sync to a paper calendar</li>
           </ul>
@@ -368,7 +368,7 @@ class App extends React.Component{
           </div>
 
           </Route>
-          <Route path='/create'>
+          <Route path='/new'>
             {requireSignon(creation)}
           </Route>
           <Route path='/conflicts'>
