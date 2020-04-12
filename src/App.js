@@ -281,7 +281,7 @@ class App extends React.Component{
              onDelete={(e, event) => this.handleDeleteClick(e, event)}
              events={recentEvents}
              eventCount={eventCount}
-             title="Recently new"
+             title="Newly created"
            >
               <AddEvent onSubmit={this.handleAddEvent}/>
            </EventList>
