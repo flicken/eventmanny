@@ -17,12 +17,14 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+import RequireLogin from "./RequireLogin"
+
 
 import chrono from "chrono-node";
 
 import { BrowserRouter, Route, Link } from "react-router-dom";
 
-import { GoogleLogin, GoogleLogout } from 'react-google-login';
+import { GoogleLogout } from 'react-google-login';
 
 import { GOOGLE_CLIENT_ID, } from "./config.js";
 
@@ -294,10 +296,6 @@ class App extends React.Component{
          </GridWithLoading>
     </Grid>
 
-    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-    var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly profile email"
-    console.log(DISCOVERY_DOCS)
-    console.log(SCOPES)
 
     const tabs = [
       {label: "Home", path: "/"},
@@ -305,6 +303,11 @@ class App extends React.Component{
       {label: "Create", path: "/create"},
       {label: "Updates", path: "/updates"},
     ]
+
+    const self = this;
+    let requireSignon = (children) => {
+      return <RequireLogin isSignedIn={isSignedIn} onSuccess={self.onLoginSuccess} onLoginFailure={self.onLoginFailure}>{children}</RequireLogin>
+    }
 
     return (
       <div>
@@ -329,22 +332,13 @@ class App extends React.Component{
             }
           </Tabs>
           <div style={{flexGrow: 1}}/>
-              { isSignedIn ?
+              {requireSignon(
                 <GoogleLogout
                     clientId={GOOGLE_CLIENT_ID}
                     buttonText="Logout"
                     onLogoutSuccess={this.onLogoutSuccess}
-                  /> : <GoogleLogin
-                      clientId={GOOGLE_CLIENT_ID}
-                      buttonText="Login"
-                      onSuccess={this.onLoginSuccess}
-                      onFailure={this.onLoginFailure}
-                     isSignedIn={true}
-                      scope = {SCOPES}
-                      discoveryDocs = {DISCOVERY_DOCS}
-                      cookiePolicy={'single_host_origin'}
-                    />
-              }
+                  />
+                )}
             </Toolbar>
           </AppBar>
 
@@ -369,14 +363,19 @@ class App extends React.Component{
           </ul>
           </div>
 
+          <div>
+          {requireSignon(<></>)}
+          </div>
+
           </Route>
           <Route path='/create'>
-            {creation}
+            {requireSignon(creation)}
           </Route>
           <Route path='/conflicts'>
-            {conflicts}
+            {requireSignon(conflicts)}
           </Route>
           <Route path='/updates'>
+          {requireSignon(
             <Grid className={classes.root} container spacing={3}>
               <Grid item xs={6}>
                    <EventList
@@ -398,6 +397,7 @@ class App extends React.Component{
                     />
                  </GridWithLoading>
             </Grid>
+          )}
           </Route>
         </div>
       </BrowserRouter>
