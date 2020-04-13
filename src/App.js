@@ -115,8 +115,10 @@ class App extends React.Component{
 
   addEvents = ({newEvents, responseTz}) => {
     this.setState((state, props) => {
-      let events = state.events.concat(newEvents)
+      let events = state.events.concat(newEvents).sort((a, b) => a.start.ms - b.start.ms || a.end.ms - b.end.ms)
       let intervals = new IntervalTree();
+      console.log("Last event")
+      console.log(events[events.length - 1])
 
       events.forEach((event) => this.handleEvent(intervals, responseTz, event));
 
@@ -135,10 +137,16 @@ class App extends React.Component{
 
   deleteEvent = (deletedEvent) => {
     this.setState((state, props) => {
-      let events = state.events.filter((e) => e.id !== deletedEvent.id);
+      let events = state.events.filter((e) => e.id !== deletedEvent.id).sort((a, b) => a.start.ms - b.start.ms || a.end.ms - b.end.ms)
       let intervals = new IntervalTree();
+      let {responseTz} = props
+      console.log("Last event")
+      console.log(events[events.length - 1])
 
-      let conflictedEvents = events.filter(e => {return e.conflicts.length > 0;})
+      let conflictedEvents = state.conflictedEvents.filter((e) => e.id !== deletedEvent.id);
+
+      events.forEach((event) => this.handleEvent(intervals, responseTz, event));
+
       conflictedEvents.forEach((e) => e.conflicts = e.conflicts.filter(id => id !== deletedEvent.id))
 
       return {
@@ -239,14 +247,7 @@ class App extends React.Component{
     this.fetcher.insert(event, (createdEvent) => {
       console.log("Event created")
       console.log(createdEvent)
-      this.setState(({intervals, events, responseTz}, {props}) => {
-        this.handleEvent(intervals, responseTz, createdEvent)
-        console.log(createdEvent)
-        return {
-          events: [...events, createdEvent]
-        }
-      }
-    )
+      this.addEvents({newEvents: [createdEvent], responseTz: this.state.responseTz})
     })
   }
 
