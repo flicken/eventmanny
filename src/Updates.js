@@ -3,6 +3,7 @@ import './App.css';
 
 import AddEvent from "./AddEvent";
 import EventList from "./EventList";
+import RelativeDate from "./RelativeDate"
 import WithLoading from "./WithLoading";
 import UpdatesFilter from "./UpdatesFilter";
 
@@ -46,7 +47,7 @@ export default function Conflicts(props) {
          <EventList
            events={props.events.filter(e => conflictWithUpdatedEventIds.has(e.id))}
            eventCount={props.eventCount}
-           title={`Conflicts with updates since ${updatesSinceDate.toRelative()}`}
+           title={<>Conflicts with updates since <RelativeDate date={updatesSinceDate}/></>}
           />
        </GridWithLoading>
   </Grid>
