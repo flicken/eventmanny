@@ -10,9 +10,6 @@ export default function UpdatesFilter(props) {
     mode: 'onChange',
   })
 
-  console.log("errors")
-  console.log(errors)
-
   return (
     <form onSubmit={handleSubmit( onValidated)}>
       {title} <input

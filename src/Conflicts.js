@@ -9,8 +9,6 @@ import Grid from '@material-ui/core/Grid';
 const GridWithLoading = WithLoading(Grid);
 
 export default function Conflicts(props) {
-  console.log("Conflicts")
-  console.log(props)
   const {focusedEvent, conflictedEvents} = props
   let focusedEvents = []
   let focusedTitle = "No event selected"

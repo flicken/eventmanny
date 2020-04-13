@@ -15,9 +15,6 @@ import {parseUpdatesSince} from "./dates"
 const GridWithLoading = WithLoading(Grid);
 
 export default function Conflicts(props) {
-  console.log("Conflicts")
-  console.log(props)
-
   let updatesSinceDate = parseUpdatesSince(props.updatesSince)
   let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
   let updatedEventIds = new Set(props.events.filter(e =>

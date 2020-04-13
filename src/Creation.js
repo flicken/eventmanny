@@ -18,8 +18,6 @@ import {parseUpdatesSince} from "./dates"
 const GridWithLoading = WithLoading(Grid);
 
 export default function Creation(props) {
-  console.log("Creation")
-  console.log(props)
   let recent = parseUpdatesSince(props.newSince)
   let recentEvents = props.events.filter(e => {
     let created = DateTime.fromISO(e.created)
