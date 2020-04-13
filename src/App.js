@@ -48,9 +48,9 @@ const emptyState = {
   conflictedEvents: [],
   eventsConflicting: [],
   events: [],
+  intervals: new IntervalTree(),
   eventCount: 0,
   loading: true,
-  intervals: new IntervalTree(),
   isSignedIn: false,
   signInError: null,
   tabValue: 0,
@@ -130,6 +130,24 @@ class App extends React.Component{
     });
   }
 
+  deleteEvent = (deletedEvent) => {
+    this.setState((state, props) => {
+      let events = state.events.filter((e) => e.id !== deletedEvent.id);
+      let intervals = new IntervalTree();
+
+      let conflictedEvents = events.filter(e => {return e.conflicts.length > 0;})
+      conflictedEvents.forEach((e) => e.conflicts = e.conflicts.filter(id => id !== deletedEvent.id))
+
+      return {
+        loading: false,
+        events: events,
+        conflictedEvents: conflictedEvents,
+        intervals: intervals,
+        eventCount: events.length
+      };
+    });
+  }
+
   doSearch = (event) => {
     this.setState({searchTerm: event.target.value},
        this.fetcher.fetch(this.addEvents));
@@ -154,12 +172,7 @@ class App extends React.Component{
     console.log("Trying to delete event")
     console.log(event)
     console.log(e)
-    this.fetcher.delete(event, () => this.setState((state, props) => {
-      let eventsWithThisEvent = state.events.filter((e) => e.id !== event.id);
-      return {
-        events: eventsWithThisEvent
-      }
-    }))
+    this.fetcher.delete(event, () => this.deleteEvent(event))
   }
 
 
@@ -253,6 +266,7 @@ class App extends React.Component{
      <Grid item xs={6}>
             <EventList
               onClick={(e, event) => this.handleEventClick(e, event)}
+              onDelete={(e, event) => this.handleDeleteClick(e, event)}
               events={conflictedEvents}
               eventCount={eventCount}
               title="Has Conflicts"
