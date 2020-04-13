@@ -54,7 +54,8 @@ const emptyState = {
   isSignedIn: false,
   signInError: null,
   tabValue: 0,
-  updatesSince: "a week ago"
+  updatesSince: "a week ago",
+  newSince: "a day ago"
 }
 
 class App extends React.Component{
@@ -194,25 +195,11 @@ class App extends React.Component{
   }
 
   handleUpdatesSince = (since) => {
-    console.log("Update since: " + since)
-    try {
-      let d = parseUpdatesSince(since)
-      if (d) {
-        console.log(d)
-        console.log(d.toISO())
-        this.setState({updatesSince: since})
-      } else {
-        console.log("Can't understand updates since: " + since)
-      }
-    } catch (err) {
-      console.log("Error updating since")
-      console.log(err)
-      // can't parse, so do nothing
-    }
+      this.setState({updatesSince: since})
   }
 
-  handleUpdateSince = (since) => {
-    this.setState({updatesSince: since})
+  handleNewSince = (since) => {
+      this.setState({newSince: since})
   }
 
   handleAddEvent = (input) => {
@@ -259,7 +246,7 @@ class App extends React.Component{
     const { classes } = this.props;
 
     const { isSignedIn, signInError, eventsConflicting, conflictedEvents, eventCount,
-      events, tabValue, updatesSince} = this.state;
+      events, tabValue, updatesSince, newSince} = this.state;
 
     const conflicts =
     <GridWithLoading className={classes.root} container isLoading={this.state.loading} spacing={3}>
@@ -281,7 +268,7 @@ class App extends React.Component{
     </GridWithLoading>
 
     let now = new DateTime({})
-    let recent = now.minus({days: 1})
+    let recent = parseUpdatesSince(newSince)
     let recentEvents = events.filter(e => {
       let created = DateTime.fromISO(e.created)
       let a = created.diff(recent)
@@ -307,7 +294,10 @@ class App extends React.Component{
              onDelete={(e, event) => this.handleDeleteClick(e, event)}
              events={recentEvents}
              eventCount={eventCount}
-             title="Newly created"
+             title={<UpdatesFilter title="Newly created since "
+            defaultValue={newSince}
+             placeholder="a day ago"
+             onValidated={this.handleNewSince}/>}
            >
               <AddEvent onSubmit={this.handleAddEvent}/>
            </EventList>
@@ -409,7 +399,10 @@ class App extends React.Component{
                      onDelete={(e, event) => this.handleDeleteClick(e, event)}
                      events={updatedEvents}
                      eventCount={eventCount}
-                     title={<UpdatesFilter title="Recent updates since " onValidated={v => this.handleUpdatesSince(v)}/>}
+                     title={<UpdatesFilter title="Recent updates since "
+                     placeholder="a week ago"
+                     defaultValue={updatesSince}
+                      onValidated={this.handleUpdatesSince}/>}
                    >
                       <AddEvent onSubmit={this.handleAddEvent}/>
                    </EventList>
