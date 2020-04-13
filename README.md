@@ -7,7 +7,7 @@ Features
 --------
  * Create: Easy entering of multiple events
  * Conflicts: See conflicts for recently entered events
- * Recent updates: See recent (past week) updates for events in the next month.
+ * Recent updates: See recent updates for events in the next month.
      This is to support syncing recent changes to a paper calendar
 
 TODO

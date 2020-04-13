@@ -6,6 +6,7 @@ import AddEvent from "./AddEvent";
 import EventList from "./EventList";
 import WithLoading from "./WithLoading";
 import EventFetcher from "./EventFetcher";
+import UpdatesFilter from "./UpdatesFilter"
 
 import IntervalTree from '@flatten-js/interval-tree';
 import { DateTime } from "luxon";
@@ -18,6 +19,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 import RequireLogin from "./RequireLogin"
+
+import {parseUpdatesSince, parseDatetime} from "./dates"
 
 
 import chrono from "chrono-node";
@@ -51,6 +54,7 @@ const emptyState = {
   isSignedIn: false,
   signInError: null,
   tabValue: 0,
+  updatesSince: "a week ago"
 }
 
 class App extends React.Component{
@@ -189,6 +193,28 @@ class App extends React.Component{
     }
   }
 
+  handleUpdatesSince = (since) => {
+    console.log("Update since: " + since)
+    try {
+      let d = parseUpdatesSince(since)
+      if (d) {
+        console.log(d)
+        console.log(d.toISO())
+        this.setState({updatesSince: since})
+      } else {
+        console.log("Can't understand updates since: " + since)
+      }
+    } catch (err) {
+      console.log("Error updating since")
+      console.log(err)
+      // can't parse, so do nothing
+    }
+  }
+
+  handleUpdateSince = (since) => {
+    this.setState({updatesSince: since})
+  }
+
   handleAddEvent = (input) => {
     console.log(input)
 
@@ -233,7 +259,7 @@ class App extends React.Component{
     const { classes } = this.props;
 
     const { isSignedIn, signInError, eventsConflicting, conflictedEvents, eventCount,
-      events, tabValue} = this.state;
+      events, tabValue, updatesSince} = this.state;
 
     const conflicts =
     <GridWithLoading className={classes.root} container isLoading={this.state.loading} spacing={3}>
@@ -262,10 +288,10 @@ class App extends React.Component{
       return a.valueOf() > 0
     })
 
-    let aWeekAgo = now.minus({days: 7})
+    let updatesSinceDate = parseUpdatesSince(updatesSince)
     let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
     let updatedEventIds = new Set(events.filter(e =>
-      DateTime.fromISO(e.updated).diff(aWeekAgo).valueOf() > 0 &&
+      DateTime.fromISO(e.updated).diff(updatesSinceDate).valueOf() > 0 &&
       DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
     ).map(e => e.id))
     let updatedEvents = events.filter(e => updatedEventIds.has(e.id))
@@ -348,14 +374,13 @@ class App extends React.Component{
           <ul>
             <li><Link to="/new" onClick={() => this.setState({tabValue: 1})}>New</Link> events, easily created</li>
             <li><Link to="/conflicts" onClick={() => this.setState({tabValue: 2})}>Conflicts</Link> shown for recently entered events</li>
-            <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar for past week, so you can sync to a paper calendar</li>
+            <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar since e.g. a week ago, so you can sync to a paper calendar</li>
           </ul>
 
           <div>
             Suggestions and feature requests on Github <a href="https://github.com/flicken/eventmanny">flicken/eventmanny</a>.  Current TODOs:
           <ul>
             <li>Select (multiple) calendars</li>
-            <li>Configurable time for "recent" updates</li>
             <li>Grouping of events (e.g. concert series or rehearsals that are related, but not regularly scheduled)</li>
             <li>Easy exception handling (e.g. school is out, so no regularly scheduled events)</li>
             <li>Attach image to events / series (e.g. picture of poster for concert series)</li>
@@ -377,13 +402,14 @@ class App extends React.Component{
           <Route path='/updates'>
           {requireSignon(
             <Grid className={classes.root} container spacing={3}>
+
               <Grid item xs={6}>
                    <EventList
                      onClick={(e, event) => this.handleEventClick(e, event)}
                      onDelete={(e, event) => this.handleDeleteClick(e, event)}
                      events={updatedEvents}
                      eventCount={eventCount}
-                     title="Recent updates for month"
+                     title={<UpdatesFilter title="Recent updates since " onValidated={v => this.handleUpdatesSince(v)}/>}
                    >
                       <AddEvent onSubmit={this.handleAddEvent}/>
                    </EventList>

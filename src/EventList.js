@@ -44,7 +44,7 @@ function EventList(props) {
     return (
       <div className="event-container">
         <div>
-          <h1>{title}</h1>
+          <h4>{title}</h4>
           <div>
             {events.length > 0 && eventsList}
             {events.length === 0 && emptyState}
