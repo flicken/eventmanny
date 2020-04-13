@@ -2,13 +2,10 @@ import React from 'react';
 
 import { useForm } from 'react-hook-form'
 
-import { DateTime } from "luxon";
-import chrono from "chrono-node";
-
-import {parseDatetime, parseUpdatesSince} from "./dates"
+import {parseUpdatesSince} from "./dates"
 
 export default function UpdatesFilter(props) {
-  const {onValidated, title, value} = props
+  const {onValidated, title} = props
   const { register, handleSubmit, errors } = useForm({
     mode: 'onChange',
   })

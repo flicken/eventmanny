@@ -2,6 +2,9 @@ import React from 'react';
 import './App.css';
 
 import AddEvent from "./AddEvent";
+import Conflicts from "./Conflicts"
+import Creation from "./Creation"
+import Updates from "./Updates"
 
 import EventList from "./EventList";
 import WithLoading from "./WithLoading";
@@ -20,7 +23,7 @@ import Tab from '@material-ui/core/Tab';
 
 import RequireLogin from "./RequireLogin"
 
-import {parseUpdatesSince, parseDatetime} from "./dates"
+import {parseUpdatesSince} from "./dates"
 
 
 import chrono from "chrono-node";
@@ -261,71 +264,11 @@ class App extends React.Component{
     const { isSignedIn, signInError, eventsConflicting, conflictedEvents, eventCount,
       events, tabValue, updatesSince, newSince} = this.state;
 
-    const conflicts =
-    <GridWithLoading className={classes.root} container isLoading={this.state.loading} spacing={3}>
-     <Grid item xs={6}>
-            <EventList
-              onClick={(e, event) => this.handleEventClick(e, event)}
-              onDelete={(e, event) => this.handleDeleteClick(e, event)}
-              events={conflictedEvents}
-              eventCount={eventCount}
-              title="Has Conflicts"
-            />
-      </Grid>
-        <Grid item xs={6}>
-          <EventList
-            events={eventsConflicting}
-            eventCount={eventCount}
-            title="Conflicts"
-           />
-        </Grid>
-    </GridWithLoading>
-
-    let now = new DateTime({})
-    let recent = parseUpdatesSince(newSince)
-    let recentEvents = events.filter(e => {
-      let created = DateTime.fromISO(e.created)
-      let a = created.diff(recent)
-      return a.valueOf() > 0
-    })
-
-    let updatesSinceDate = parseUpdatesSince(updatesSince)
-    let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
-    let updatedEventIds = new Set(events.filter(e =>
-      DateTime.fromISO(e.updated).diff(updatesSinceDate).valueOf() > 0 &&
-      DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
-    ).map(e => e.id))
-    let updatedEvents = events.filter(e => updatedEventIds.has(e.id))
-    let conflictWithUpdatedEventIds = new Set(updatedEvents.flatMap(e => e.conflicts).filter(id => !updatedEventIds.has(id)))
-
-    const recentEventIds = new Set(recentEvents.map(e => e.id))
-    const conflictingIds = new Set(recentEvents.flatMap(e => e.conflicts).filter(id => !recentEventIds.has(id)))
-
-    const creation = <Grid className={classes.root} container spacing={3}>
-    <Grid item xs={6}>
-           <EventList
-             onClick={(e, event) => this.handleEventClick(e, event)}
-             onDelete={(e, event) => this.handleDeleteClick(e, event)}
-             events={recentEvents}
-             eventCount={eventCount}
-             title={<UpdatesFilter title="Newly created since "
-            defaultValue={newSince}
-             placeholder="a day ago"
-             onValidated={this.handleNewSince}/>}
-           >
-              <AddEvent onSubmit={this.handleAddEvent}/>
-           </EventList>
-
-         </Grid>
-         <GridWithLoading isLoading={this.state.loading} item xs={6}>
-           <EventList
-             events={events.filter(e => conflictingIds.has(e.id))}
-             eventCount={eventCount}
-             title="Conflict with"
-            />
-         </GridWithLoading>
-    </Grid>
-
+    const eventHandlers = {
+      onDelete: this.handleDeleteClick,
+      onClick: this.handleEventClick,
+      onAdd: this.handleAddEvent,
+    }
 
     const tabs = [
       {label: "Home", path: "/"},
@@ -398,39 +341,25 @@ class App extends React.Component{
 
           </Route>
           <Route path='/new'>
-            {requireSignon(creation)}
+            {requireSignon(<Creation eventHandlers={eventHandlers}
+              handleNewSince={this.handleNewSince}
+               {...this.props}
+               {...this.state}/>)}
           </Route>
           <Route path='/conflicts'>
-            {requireSignon(conflicts)}
+            {requireSignon(<Conflicts
+              eventHandlers={eventHandlers}
+              {...eventHandlers}
+              {...this.props}
+              {...this.state}/>)}
           </Route>
           <Route path='/updates'>
-          {requireSignon(
-            <Grid className={classes.root} container spacing={3}>
-
-              <Grid item xs={6}>
-                   <EventList
-                     onClick={(e, event) => this.handleEventClick(e, event)}
-                     onDelete={(e, event) => this.handleDeleteClick(e, event)}
-                     events={updatedEvents}
-                     eventCount={eventCount}
-                     title={<UpdatesFilter title="Recent updates since "
-                     placeholder="a week ago"
-                     defaultValue={updatesSince}
-                      onValidated={this.handleUpdatesSince}/>}
-                   >
-                      <AddEvent onSubmit={this.handleAddEvent}/>
-                   </EventList>
-
-                 </Grid>
-                 <GridWithLoading isLoading={this.state.loading} item xs={6}>
-                   <EventList
-                     events={events.filter(e => conflictWithUpdatedEventIds.has(e.id))}
-                     eventCount={eventCount}
-                     title="Conflict with"
-                    />
-                 </GridWithLoading>
-            </Grid>
-          )}
+          {requireSignon(<Updates
+            eventHandlers={eventHandlers}
+            handleUpdatesSince={this.handleUpdatesSince}
+            {...eventHandlers}
+            {...this.props}
+            {...this.state}/>)}
           </Route>
         </div>
       </BrowserRouter>
