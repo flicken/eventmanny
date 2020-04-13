@@ -45,13 +45,14 @@ function DeleteButton(props) {
   return <DeleteIcon {...props} onClick={handleClick} />
 }
 
+function ConflictsBadge({conflicts}) {
+  return <Badge badgeContent={conflicts.length} max={99} color="primary">
+   <EventBusy />
+ </Badge>
+}
+
 export default function Event({event, onClick, onDelete}) {
   const classes = useStyles()
-
-  let warningBadge = event.conflicts.length === 0 ? null :
-   <Badge badgeContent={event.conflicts.length} max={99} color="primary">
-    <EventBusy />
-  </Badge>
 
   return (
     <React.Fragment>
@@ -75,8 +76,8 @@ export default function Event({event, onClick, onDelete}) {
         </React.Fragment>
       }
     />
-    <DeleteButton event={event} onClick={onDelete}/>
-    {warningBadge}
+    { onDelete && <DeleteButton event={event} onClick={onDelete}/>}
+    {event.conflicts && event.conflicts.length > 0 && <ConflictsBadge conflicts={event.conflicts}/>}
 
   </ListItem>
   <Divider />
