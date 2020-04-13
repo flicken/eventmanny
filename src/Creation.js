@@ -3,7 +3,6 @@ import React from 'react';
 import './App.css';
 
 import UpdatesFilter from "./UpdatesFilter"
-import AddEvent from "./AddEvent"
 import RelativeDate from "./RelativeDate"
 
 import EventList from "./EventList";
@@ -39,9 +38,7 @@ export default function Creation(props) {
         defaultValue={props.newSince}
          placeholder="a day ago"
          onValidated={props.handleNewSince}/>}
-       >
-          <AddEvent onSubmit={props.eventHandlers.onAdd}/>
-       </EventList>
+        />
 
      </Grid>
      <GridWithLoading isLoading={props.loading} item xs={6}>

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 
 import Event from "./Event"
+import AddEvent from "./AddEvent";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 function EventList(props) {
 
     const classes = useStyles()
-    const { events, eventCount, title, onClick, onDelete } = props;
+    const { events, eventCount, title, onClick, onDelete, onAdd } = props;
 
     let eventsList = <div>
      {events.length} / {eventCount} events shown
@@ -49,6 +50,7 @@ function EventList(props) {
             {events.length > 0 && eventsList}
             {events.length === 0 && emptyState}
             {props.children}
+            {onAdd && <AddEvent onSubmit={onAdd}/>}
           </div>
         </div>
       </div>

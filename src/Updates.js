@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.css';
 
-import AddEvent from "./AddEvent";
 import EventList from "./EventList";
 import RelativeDate from "./RelativeDate"
 import WithLoading from "./WithLoading";
@@ -35,9 +34,7 @@ export default function Conflicts(props) {
            placeholder="a week ago"
            defaultValue={props.updatesSince}
             onValidated={props.handleUpdatesSince}/>}
-         >
-            <AddEvent onSubmit={props.eventHandlers.onAdd}/>
-         </EventList>
+         />
 
        </Grid>
        <GridWithLoading isLoading={props.loading} item xs={6}>
