@@ -5,7 +5,7 @@ import { GoogleLogin } from 'react-google-login';
 
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 
-const CALENDAR_READONLY = "https://www.googleapis.com/auth/calendar.readonly"
+// const CALENDAR_READONLY = "https://www.googleapis.com/auth/calendar.readonly"
 const EVENTS_READONLY = "https://www.googleapis.com/auth/calendar.events.readonly"
 const EVENTS_READWRITE = "https://www.googleapis.com/auth/calendar.events"
 const SCOPES = [

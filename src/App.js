@@ -1,30 +1,22 @@
 import React from 'react';
 import './App.css';
 
-import AddEvent from "./AddEvent";
 import Conflicts from "./Conflicts"
 import Creation from "./Creation"
 import Updates from "./Updates"
 
-import EventList from "./EventList";
-import WithLoading from "./WithLoading";
 import EventFetcher from "./EventFetcher";
-import UpdatesFilter from "./UpdatesFilter"
 
 import IntervalTree from '@flatten-js/interval-tree';
 import { DateTime } from "luxon";
 
 import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 import RequireLogin from "./RequireLogin"
-
-import {parseUpdatesSince} from "./dates"
-
 
 import chrono from "chrono-node";
 
@@ -44,8 +36,6 @@ const useStyles = theme => ({
     color: theme.palette.text.secondary,
   },
   });
-
-const GridWithLoading = WithLoading(Grid);
 
 const emptyState = {
   conflictedEvents: [],
@@ -260,8 +250,7 @@ class App extends React.Component{
   render() {
     const { classes } = this.props;
 
-    const { isSignedIn, signInError, conflictedEvents, eventCount,
-      events, tabValue, updatesSince, newSince} = this.state;
+    const { isSignedIn, signInError, tabValue} = this.state;
 
     const eventHandlers = {
       onDelete: this.handleDeleteClick,
