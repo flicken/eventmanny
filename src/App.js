@@ -3,6 +3,7 @@ import './App.css';
 
 import Conflicts from "./Conflicts"
 import Creation from "./Creation"
+import Home from "./Home"
 import Updates from "./Updates"
 
 import EventFetcher from "./EventFetcher";
@@ -46,7 +47,6 @@ const emptyState = {
   loading: true,
   isSignedIn: false,
   signInError: null,
-  tabValue: 0,
   updatesSince: "a week ago",
   newSince: "a day ago"
 }
@@ -236,16 +236,10 @@ class App extends React.Component{
     })
   }
 
-  handleChange = (event, newValue) => {
-    console.log(event)
-    console.log(newValue)
-    this.setState({tabValue: newValue});
-  };
-
   render() {
     const { classes } = this.props;
 
-    const { isSignedIn, signInError, tabValue} = this.state;
+    const { isSignedIn, signInError} = this.state;
 
     const eventHandlers = {
       onDelete: this.handleDeleteClick,
@@ -272,11 +266,12 @@ class App extends React.Component{
             <AppBar position="static">
           <Toolbar>
 
-          <Tabs value={tabValue} onChange={this.handleChange} variant="fullWidth">
+          <Tabs value={window.location.pathname} variant="fullWidth">
             {
               tabs.map(
                 ({label, path})=><Tab key={label}
                                       label={label}
+                                      value={path}
                                       style={{
                                           display:"flex",
                                           alignItems:"center",
@@ -300,28 +295,9 @@ class App extends React.Component{
 
           {signInError && <div>Sign on error: {signInError}</div>}
           <Route exact path='/'>
-          <div>Bring a bit of structure to your chaotic schedule.</div>
-          <ul>
-            <li><Link to="/new" onClick={() => this.setState({tabValue: 1})}>New</Link> events, easily created</li>
-            <li><Link to="/conflicts" onClick={() => this.setState({tabValue: 2})}>Conflicts</Link> shown for recently entered events</li>
-            <li><Link to="/updates" onClick={() => this.setState({tabValue: 3})}>Updates</Link> to calendar since e.g. a week ago, so you can sync to a paper calendar</li>
-          </ul>
-
-          <div>
-            Suggestions and feature requests on Github <a href="https://github.com/flicken/eventmanny">flicken/eventmanny</a>.  Current TODOs:
-          <ul>
-            <li>Select (multiple) calendars</li>
-            <li>Grouping of events (e.g. concert series or rehearsals that are related, but not regularly scheduled)</li>
-            <li>Easy exception handling (e.g. school is out, so no regularly scheduled events)</li>
-            <li>Attach image to events / series (e.g. picture of poster for concert series)</li>
-            <li>Even easier entering of series (e.g. concert series that has mostly the same info, but different dates, times, location, headline acts, etc)</li>
-          </ul>
-          </div>
-
-          <div>
-          {requireSignon(<></>)}
-          </div>
-
+            <Home>
+              {requireSignon(<></>)}
+            </Home>
           </Route>
           <Route path='/new'>
             {requireSignon(<Creation
