@@ -49,7 +49,7 @@ const GridWithLoading = WithLoading(Grid);
 
 const emptyState = {
   conflictedEvents: [],
-  eventsConflicting: [],
+  focusedEvent: null,
   events: [],
   intervals: new IntervalTree(),
   eventCount: 0,
@@ -162,10 +162,8 @@ class App extends React.Component{
     console.log(e)
 
     this.setState((state, props) => {
-      let eventsConflicting = state.events.filter((e) => event.conflicts.includes(e.id));
       return {
-        focusedEvent: event,
-        eventsConflicting
+        focusedEvent: event
       };
     }
     )
@@ -261,7 +259,7 @@ class App extends React.Component{
   render() {
     const { classes } = this.props;
 
-    const { isSignedIn, signInError, eventsConflicting, conflictedEvents, eventCount,
+    const { isSignedIn, signInError, conflictedEvents, eventCount,
       events, tabValue, updatesSince, newSince} = this.state;
 
     const eventHandlers = {

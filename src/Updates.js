@@ -46,7 +46,7 @@ export default function Conflicts(props) {
          <EventList
            events={props.events.filter(e => conflictWithUpdatedEventIds.has(e.id))}
            eventCount={props.eventCount}
-           title="Conflict with"
+           title={`Conflicts with updates since ${updatesSinceDate.toRelative()}`}
           />
        </GridWithLoading>
   </Grid>
