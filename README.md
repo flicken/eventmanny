@@ -13,7 +13,6 @@ Features
 TODO
 ----
  * Select (multiple) calendars
- * Configurable time for "recent" updates
  * Grouping of events (e.g. concert series or rehearsals that are related,
       but not regularly scheduled)
  * Easy exception handling (e.g. school is out, so no regularly scheduled
@@ -21,3 +20,18 @@ TODO
  * Attach image to events / series (e.g. picture of poster for concert series)
  * Even easier entering of series (e.g. concert series that has mostly the
      same info,  but different dates, times, location, headline acts, etc)
+ * A better way to mix-and-match creating, seeing conflicts, seeing updates, grouping, etc.
+   Possibly as a command interface.  E.g. be able to type:
+   * "updates since last Tuesday [until the end of the month]" or
+   * "conflicts for choir events" or
+   * "new schedule Le Nozze di Figaro" or
+   * "show schedule Tae Kwon Do" or
+   * "updates to choir schedule"
+
+
+TECHNICAL TODO
+--------------
+ * Refactor into smaller, testable components
+ * Better state handling + event fetching
+ * Unit testing of components
+ * End-to-end testing
