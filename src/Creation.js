@@ -35,7 +35,7 @@ export default function Creation(props) {
          events={recentEvents}
          eventCount={props.eventCount}
          title={<UpdatesFilter title="Newly created since "
-        defaultValue={props.newSince}
+         defaultValue={props.newSince}
          placeholder="a day ago"
          onValidated={props.handleNewSince}/>}
         />

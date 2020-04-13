@@ -155,14 +155,10 @@ class App extends React.Component{
   }
 
   handleEventClick = (e, event) => {
-    console.log("Trying to filter by event")
-    console.log(event)
-    console.log(e)
-
     this.setState((state, props) => {
       return {
         focusedEvent: event
-      };
+      }
     }
     )
   }
@@ -170,7 +166,6 @@ class App extends React.Component{
   handleDeleteClick = (e, event) => {
     console.log("Trying to delete event")
     console.log(event)
-    console.log(e)
     this.fetcher.delete(event, () => this.deleteEvent(event))
   }
 
@@ -329,8 +324,10 @@ class App extends React.Component{
 
           </Route>
           <Route path='/new'>
-            {requireSignon(<Creation eventHandlers={eventHandlers}
+            {requireSignon(<Creation
+              eventHandlers={eventHandlers}
               handleNewSince={this.handleNewSince}
+               {...eventHandlers}
                {...this.props}
                {...this.state}/>)}
           </Route>

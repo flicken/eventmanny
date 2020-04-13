@@ -51,12 +51,12 @@ function ConflictsBadge({conflicts}) {
  </Badge>
 }
 
-export default function Event({event, onClick, onDelete}) {
+export default function Event({event, onClick, onDelete, selected}) {
   const classes = useStyles()
 
   return (
     <React.Fragment>
-  <ListItem  button component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
+  <ListItem button selected={selected} component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
   <ListItemAvatar>
     <Avatar alt={event.summary} src="doesnotexist.jpg" />
   </ListItemAvatar>

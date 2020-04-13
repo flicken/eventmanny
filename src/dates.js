@@ -31,21 +31,16 @@ export const parseUpdatesSince = (since) => {
 
   // try prefixing "last"
   if (d.diff(now).valueOf() > 0) {
-    console.log("Trying to add last")
     d = parseDatetime("last " + since)
   }
   // try suffixing "ago"
   if (d.diff(now).valueOf() > 0) {
-    console.log("Trying to add ago")
     d = parseDatetime(since + " ago")
   }
 
   if (d.diff(now).valueOf() > 0) {
-    console.log("In future: "  + d.toISO())
     return false
   }
 
-  console.log(d)
-  console.log(d.toISO())
   return d;
 }

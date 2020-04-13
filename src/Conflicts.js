@@ -23,6 +23,7 @@ export default function Conflicts(props) {
             {...props.eventHandlers}
             events={conflictedEvents}
             eventCount={props.eventCount}
+            focusedEvent={focusedEvent}
             title="Has Conflicts"
           />
     </Grid>

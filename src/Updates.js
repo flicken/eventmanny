@@ -13,7 +13,7 @@ import {parseUpdatesSince} from "./dates"
 
 const GridWithLoading = WithLoading(Grid);
 
-export default function Conflicts(props) {
+export default function Updates(props) {
   let updatesSinceDate = parseUpdatesSince(props.updatesSince)
   let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
   let updatedEventIds = new Set(props.events.filter(e =>
@@ -23,17 +23,20 @@ export default function Conflicts(props) {
   let updatedEvents = props.events.filter(e => updatedEventIds.has(e.id))
   let conflictWithUpdatedEventIds = new Set(updatedEvents.flatMap(e => e.conflicts).filter(id => !updatedEventIds.has(id)))
 
-  return <Grid className={props.classes.root} container spacing={3}>
+  console.log("Focused event updates")
+  console.log(props.focusedEvent)
 
+  return <Grid className={props.classes.root} container spacing={3}>
     <Grid item xs={6}>
          <EventList
+           focusedEvent={props.focusedEvent}
            {...props.eventHandlers}
            events={updatedEvents}
            eventCount={props.eventCount}
            title={<UpdatesFilter title="Recent updates since "
-           placeholder="a week ago"
-           defaultValue={props.updatesSince}
-            onValidated={props.handleUpdatesSince}/>}
+                    placeholder="a week ago"
+                    defaultValue={props.updatesSince}
+                    onValidated={props.handleUpdatesSince}/>}
          />
 
        </Grid>

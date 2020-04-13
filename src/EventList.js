@@ -20,15 +20,20 @@ const useStyles = makeStyles((theme) => ({
 function EventList(props) {
 
     const classes = useStyles()
-    const { events, eventCount, title, onClick, onDelete, onAdd } = props;
+    const { events, eventCount, title, onClick, onDelete, onAdd, focusedEvent} = props
 
     let eventsList = <div>
      {events.length} / {eventCount} events shown
        <List className={classes.root}>
        { events.map((event) => {
+        let selected = focusedEvent && event.id === focusedEvent.id
 
         return (
-          <Event key={event.id} event={event} onClick={onClick} onDelete={onDelete}/ >
+          <Event key={event.id}
+                 event={event}
+                 selected={selected}
+                 onClick={onClick}
+                 onDelete={onDelete}/ >
       )
     })}
       </List>
