@@ -31,7 +31,7 @@ function showTime(event) {
     return "All day"
   } else {
 
-    // TODO handle multi-day events
+    // TODO handle multi  -day events
     return DateTime.fromMillis(event.start.ms).toLocaleString(DateTime.TIME_SIMPLE) + " - " + DateTime.fromMillis(event.end.ms).toLocaleString(DateTime.TIME_SIMPLE)
   }
 }
@@ -51,12 +51,12 @@ function ConflictsBadge({conflicts}) {
  </Badge>
 }
 
-export default function Event({event, onClick, onDelete, selected}) {
+export default function Event({event, onClick, onDelete, selected, style}) {
   const classes = useStyles()
 
   return (
     <React.Fragment>
-  <ListItem button selected={selected} component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
+  <ListItem style={style} button selected={selected} component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
   <ListItemAvatar>
     <Avatar alt={event.summary} src="doesnotexist.jpg" />
   </ListItemAvatar>
