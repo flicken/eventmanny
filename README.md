@@ -35,3 +35,4 @@ TECHNICAL TODO
  * Better state handling + event fetching
  * Unit testing of components
  * End-to-end testing
+ * Implement as a CLUI, see https://blog.repl.it/clui or https://github.com/IBM/kui
