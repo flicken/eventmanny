@@ -7,7 +7,7 @@ import {parseUpdatesSince} from "./dates"
 export default function UpdatesFilter(props) {
   const {onValidated, title} = props
   const { register, handleSubmit, errors } = useForm({
-    mode: 'onChange',
+    mode: 'onBlur',
   })
 
   return (
