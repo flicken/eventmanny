@@ -13,6 +13,8 @@ import Typography from '@material-ui/core/Typography';
 import Badge from '@material-ui/core/Badge';
 import EventBusy from '@material-ui/icons/Event';
 import DeleteIcon from '@material-ui/icons/Delete';
+import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,7 +53,7 @@ function ConflictsBadge({conflicts}) {
  </Badge>
 }
 
-export default function Event({event, onClick, onDelete, selected}) {
+export default function Event({event, conflicts, onClick, onDelete, selected}) {
   const classes = useStyles()
 
   return (
@@ -76,8 +78,8 @@ export default function Event({event, onClick, onDelete, selected}) {
         </React.Fragment>
       }
     />
-    { onDelete && <DeleteButton event={event} onClick={onDelete}/>}
-    {event.conflicts && event.conflicts.length > 0 && <ConflictsBadge conflicts={event.conflicts}/>}
+    { (event.status === "cancelled") ? <HourglassEmptyIcon/> : (onDelete && <DeleteButton event={event} onClick={onDelete}/>)}
+    {conflicts && conflicts.length > 0 && <ConflictsBadge conflicts={conflicts}/>}
 
   </ListItem>
   <Divider />

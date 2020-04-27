@@ -6,6 +6,10 @@ import List from '@material-ui/core/List';
 import Event from "./Event"
 import AddEvent from "./AddEvent";
 
+import {eventsSelectors} from "./redux/eventsSlice"
+import { connect } from 'react-redux'
+
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -17,20 +21,44 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+
+const makeMapStateToProps = () => (state, props) => {
+  return {
+    event: eventsSelectors.selectById(state, props.eventId),
+    conflicts: state.events.conflicts[props.eventId],
+  }
+}
+
+const ConnectedEvent = connect(makeMapStateToProps)(Event)
+
+
 function EventList(props) {
 
     const classes = useStyles()
-    const { events, eventCount, title, onClick, onDelete, onAdd, focusedEvent} = props
+    const {
+      ids,
+      focusedEventId,
+      eventCount,
+      title,
+      onClick,
+      onDelete,
+      onAdd,
+      focusedEvent
+    } = props
+    console.log("EventList")
+    console.log(props)
 
     let eventsList = <div>
-     {events.length} / {eventCount} events shown
+     {ids.length} / {eventCount} events shown
        <List className={classes.root}>
-       { events.map((event) => {
-        let selected = focusedEvent && event.id === focusedEvent.id
+       { ids.map((id) => {
+        let selected = id === focusedEventId
 
         return (
-          <Event key={event.id}
-                 event={event}
+          <ConnectedEvent
+                 key={id}
+                 eventId={id}
                  selected={selected}
                  onClick={onClick}
                  onDelete={onDelete}/ >
@@ -52,8 +80,8 @@ function EventList(props) {
         <div>
           <h4>{title}</h4>
           <div>
-            {events.length > 0 && eventsList}
-            {events.length === 0 && emptyState}
+            {ids.length > 0 && eventsList}
+            {ids.length === 0 && emptyState}
             {props.children}
             {onAdd && <AddEvent onSubmit={onAdd}/>}
           </div>
