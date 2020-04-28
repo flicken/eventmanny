@@ -6,8 +6,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import {Link} from "react-router-dom"
 
@@ -54,23 +52,18 @@ function ConflictsBadge({conflicts}) {
  </Badge>
 }
 
-function MaybeLink({hash, children}) {
-  if (hash) {
-    return <Link to={{hash: `#${hash}`}}>{children}</Link>
-  } else {
-    return <>{children}</>
-  }
-}
-
 export default function Event({event, conflicts, onClick, onDelete, selected, showLink}) {
   const classes = useStyles()
 
   return (
     <React.Fragment>
-  <ListItem button selected={selected} to={showLink && {hash: event.id}} component={showLink ? Link : "a"} alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
-  <ListItemAvatar>
-    <Avatar alt={event.summary} src="doesnotexist.jpg" />
-  </ListItemAvatar>
+  <ListItem button
+    selected={selected}
+    to={showLink && {hash: event.id}}
+    component={showLink ? Link : "a"}
+    alignItems="flex-start"
+    onClick={(e)=>onClick && onClick(e, event)}>
+    {conflicts && conflicts.length > 0 && <ConflictsBadge conflicts={conflicts}/>}
     <ListItemText
       primary={event.summary}
       secondary={
@@ -88,7 +81,6 @@ export default function Event({event, conflicts, onClick, onDelete, selected, sh
       }
     />
     { (event.status === "cancelled") ? <HourglassEmptyIcon/> : (onDelete && <DeleteButton event={event} onClick={onDelete}/>)}
-    {conflicts && conflicts.length > 0 && <ConflictsBadge conflicts={conflicts}/>}
 
   </ListItem>
   <Divider />

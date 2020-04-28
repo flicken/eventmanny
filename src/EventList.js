@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-
 const makeMapStateToProps = () => (state, props) => {
   return {
     event: eventsSelectors.selectById(state, props.eventId),
@@ -37,27 +36,22 @@ function EventList(props) {
     const classes = useStyles()
     const {
       ids,
-      focusedEventId,
       eventCount,
       title,
       onClick,
       onDelete,
       onAdd,
-      focusedEvent,
       showLink,
     } = props
-    
+
     let eventsList = <div>
      {ids.length} / {eventCount} events shown
        <List className={classes.root}>
        { ids.map((id) => {
-        let selected = id === focusedEventId
-
         return (
           <ConnectedEvent
                  key={id}
                  eventId={id}
-                 selected={selected}
                  showLink={showLink}
                  onClick={onClick}
                  onDelete={onDelete}/ >

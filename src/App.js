@@ -14,17 +14,14 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+import RelativeDate from "./RelativeDate"
+
 import RequireLogin from "./RequireLogin"
 
-import { BrowserRouter, Route, Link, Switch, NavLink} from "react-router-dom"
+import { BrowserRouter, Route, Switch, NavLink, useLocation} from "react-router-dom"
 import { withRouter } from "react-router"
 
-import { GoogleLogout } from 'react-google-login';
-
-import { GOOGLE_CLIENT_ID, } from "./config.js";
-
-import {addEvent, deleteEvent, setFocusedEvent, fetchEvents, eventsSelectors} from "./redux/eventsSlice"
-import {onLoginSuccess, onLogoutSuccess, onLoginFailure} from "./redux/sessionSlice"
+import {addEvent, deleteEvent, fetchEvents, eventsSelectors} from "./redux/eventsSlice"
 import {setVisibilityFilterSince} from "./redux/visibilitySlice"
 
 import { connect } from 'react-redux'
@@ -34,7 +31,7 @@ import WithLoading from "./WithLoading";
 
 import Grid from '@material-ui/core/Grid';
 
-const GridWithLoading = WithLoading(Grid);
+const GridWithLoading = WithLoading(Grid)
 
 
 const useStyles = theme => ({
@@ -49,15 +46,18 @@ const useStyles = theme => ({
   });
 
 const getAllVisibleEventIds = (state, location, filter) => {
+  console.time('getAllVisibleEventIds')
 
   let recent = parseUpdatesSince(filter.since)
 
-  let left;
+  let left
+  let title
   switch (location.pathname) {
     case "/new":
       left = eventsSelectors.selectAll(state).filter(e =>
         DateTime.fromISO(e.created).diff(recent).valueOf() > 0
       ).map(e => e.id)
+      title = <>newly created since <RelativeDate date={recent}/></>
       break
 
     case "/updates":
@@ -66,19 +66,22 @@ const getAllVisibleEventIds = (state, location, filter) => {
           DateTime.fromISO(e.updated).diff(recent).valueOf() > 0 &&
           DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
         ).map(e => e.id)
+        title = <>updates since <RelativeDate date={recent}/></>
         break
 
     case "/conflicts":
-      let conflicts = new Set(Object.keys(state.events.conflicts))
-      left = state.events.ids.filter(id => conflicts.has(id))
+      left = state.events.ids.filter(id => state.events.conflicts[id]?.length)
+      title = <>(nothing selected)</>
       break
 
     default:
       left = state.events.ids
+      title = <>all</>
       break
   }
 
   let right
+  let rightTitle
   switch (location.hash) {
     case "conflicts":
     case "":
@@ -87,146 +90,172 @@ const getAllVisibleEventIds = (state, location, filter) => {
       ))
       left.forEach(id => allConflicts.delete(id))
       right = Array.from(allConflicts)
+      if (title) {
+        rightTitle = <>Conflicts with {title}</>
+      } else {
+        rightTitle = <>Select event to see conflicts</>
+      }
       break
 
     default:
       let hash = location.hash?.substring(1)
-      let id = eventsSelectors.selectById(state, hash)?.id
-      let conflicts = state.events.conflicts[id]
-      right = conflicts ? conflicts : []
+      let event = eventsSelectors.selectById(state, hash)
+      if (event) {
+        let id = event.id
+        let conflicts = state.events.conflicts[id]
+        right = conflicts ? conflicts : []
+        rightTitle = `Conflicts with ${event.summary}`
+      } else {
+        right = []
+        rightTitle = ""
+      }
   }
 
-  return {left, right}
+  console.timeEnd('getAllVisibleEventIds')
+  return {left, right, rightTitle}
 }
 
 const mapStateToProps = (state, props) => {
   console.log("Map state to props")
-  const {left, right} = getAllVisibleEventIds(state, props.location, state.visibilityFilter)
     return {
-      eventIds: left,
-      rightIds: right,
-      totalEventCount: eventsSelectors.selectTotal(state),
-      since: state.visibilityFilter.since,
       focusedEventId: props.location.hash?.substring(1),
-      isSignedIn: state.session.isSignedIn,
-      signInError: state.session.signInError,
       loading: !state.events.atLeastOneFetched,
     }
 }
 
 const leftEventsMapStateToProps = (state, props) => {
-
+  const {left} = getAllVisibleEventIds(state, props.location, state.visibilityFilter)
+  return {
+    ids: left,
+    eventCount: eventsSelectors.selectTotal(state),
+    since: state.visibilityFilter.since,
+    loading: !state.events.atLeastOneFetched,
+  }
 }
 
+const LeftEventList = withRouter(connect(leftEventsMapStateToProps)(EventList))
+
+
+const rightEventsMapStateToProps = (state, props) => {
+  const {right, rightTitle} = getAllVisibleEventIds(state, props.location, state.visibilityFilter)
+  return {
+    ids: right,
+    title: rightTitle,
+    eventCount: eventsSelectors.selectTotal(state),
+    loading: !state.events.atLeastOneFetched,
+  }
+}
+
+const RightEventList = withRouter(connect(rightEventsMapStateToProps)(EventList))
+
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onDelete: (e, event) => {
+      console.log("onDelete")
+      console.log(event)
+      dispatch(deleteEvent(event))
+    },
+    onAdd: e => {
+      dispatch(addEvent(e))
+    },
+    onLoginCallback: () => dispatch(fetchEvents())
+  }
+}
+function MyTabs({tabs}) {
+  let location = useLocation()
+
+  return <Tabs value={location.pathname} variant="fullWidth">
+    {
+      tabs.map(
+        ({label, path})=><Tab key={label}
+                              label={label}
+                              value={path}
+                              style={{
+                                  display:"flex",
+                                  alignItems:"center",
+                                  justifyContent:"center"
+                              }}
+                              component={NavLink}
+                              to={path} />
+      )
+    }
+  </Tabs>
+}
+
+const tabs = [
+  {label: "Home", path: "/"},
+  {label: "Conflicts", path: "/conflicts"},
+  {label: "New", path: "/new"},
+  {label: "Updates", path: "/updates"},
+]
+
+
+const SignInError = connect((state) => {return {signInError: state.session.signInError}})(({signInError}) => {
+  if (signInError) {
+    return <div>Sign on error: {signInError}</div>
+  } else {
+    return <></>
+  }
+})
+
+const ConnectedUpdatesFilter = connect((state) => {return {
+  since: state.visibilityFilter.since,
+}},
+(dispatch) => {return {
+  onValidated: value => dispatch(setVisibilityFilterSince(value))
+}}
+)(({since, onValidated}) => <UpdatesFilter title="since "
+defaultValue={since}
+placeholder="a week ago"
+onValidated={onValidated}/>)
 
 function InnerApp(props) {
-    const { location, classes, store, eventIds, eventsCount, totalEventCount,
-      focusedEventId, focusedTitle, since,
-      isSignedIn, signInError, rightIds} = props;
-
-    const eventHandlers = {
-      onDelete: (e, event) => {
-        console.log("onDelete")
-        console.log(event)
-        store.dispatch(deleteEvent(event))
-      },
-      onAdd: (e) => {
-        store.dispatch(addEvent(e))
-      },
-    }
-
-    const tabs = [
-      {label: "Home", path: "/"},
-      {label: "Conflicts", path: "/conflicts"},
-      {label: "New", path: "/new"},
-      {label: "Updates", path: "/updates"},
-    ]
-
-    let requireSignon = (children) => {
-      let onSuccess = e => {
-        store.dispatch(onLoginSuccess({token: e.tokenObj, profile: e.profileObj}))
-        store.dispatch(fetchEvents())
-      }
-
-      return <RequireLogin
-      isSignedIn={isSignedIn}
-                  onSuccess={onSuccess}
-                  onLoginFailure={e => store.dispatch(onLoginFailure(e))}>
-                  {children}
-              </RequireLogin>
-    }
+    const { classes, onDelete, onAdd, onLoginCallback, location} = props;
 
     return (<>
         <div className={classes.root}>
           <AppBar position="static">
           <Toolbar>
-          <Tabs value={location.pathname} variant="fullWidth">
-            {
-              tabs.map(
-                ({label, path})=><Tab key={label}
-                                      label={label}
-                                      value={path}
-                                      style={{
-                                          display:"flex",
-                                          alignItems:"center",
-                                          justifyContent:"center"
-                                      }}
-                                      component={NavLink}
-                                      to={path} />
-              )
-            }
-          </Tabs>
+          <MyTabs tabs={tabs}/>
           <div style={{flexGrow: 1}}/>
-              {requireSignon(
-                <GoogleLogout
-                    clientId={GOOGLE_CLIENT_ID}
-                    buttonText="Logout"
-                    onLogoutSuccess={e => store.dispatch(onLogoutSuccess(e))}
-                  />
-                )}
+              <RequireLogin showLogout={true} callback={onLoginCallback}/>
             </Toolbar>
           </AppBar>
           </div>
 
-          {signInError && <div>Sign on error: {signInError}</div>}
+          <SignInError/>
           <Switch>
             <Route exact path='/'>
               <Home>
-                {requireSignon(<></>)}
+                <RequireLogin/>
               </Home>
             </Route>
             <Route path='/'>
-
-              {requireSignon(<GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3}>
-               <Grid item xs={6}>
-                      <EventList
-                        {...eventHandlers}
-                        ids={eventIds}
-                        showLink={true}
-                        eventCount={totalEventCount}
-                        focusedEventId={focusedEventId}
-                        title={<UpdatesFilter title="since "
-                        defaultValue={since}
-                        placeholder="a week ago"
-                        onValidated={value => store.dispatch(setVisibilityFilterSince(value))}/>}
-                      />
-                </Grid>
-                  <Grid item xs={6}>
-                    {rightIds &&  <EventList
-                             ids={rightIds}
-                             eventCount={totalEventCount}
-                             title={focusedTitle}
-                            />
-            }
+              <RequireLogin>
+                <GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3}>
+                 <Grid item xs={6}>
+                        <LeftEventList
+                          showLink={true}
+                          onDelete={onDelete}
+                          path={location.path}
+                          selectedEventId={location.hash?.substring(1)}
+                          onAdd={onAdd}
+                          title={<ConnectedUpdatesFilter/>}
+                        />
                   </Grid>
-              </GridWithLoading>)}
+                    <Grid item xs={6}>
+                      <RightEventList location={location}/>
+                    </Grid>
+                </GridWithLoading>
+              </RequireLogin>
             </Route>
           </Switch>
           </>
     )
   }
 
-const InnerAppWithRouter = withStyles(useStyles)(withRouter(connect(mapStateToProps)(InnerApp)))
+const InnerAppWithRouter = withStyles(useStyles)(withRouter(connect(mapStateToProps, mapDispatchToProps)(InnerApp)))
 
 function App(props) {
   return (

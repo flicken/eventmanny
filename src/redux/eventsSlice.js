@@ -1,6 +1,5 @@
 import {
   createAsyncThunk,
-  createAction,
   createEntityAdapter,
   createSlice
 } from '@reduxjs/toolkit'
@@ -110,8 +109,6 @@ const toDatetime = (components, other) => {
 }
 
 
-export const setFocusedEvent = createAction('events/setFocusedEvent')
-
 export const deleteEvent = createAsyncThunk(
   'events/deleteEventStatus',
   async (event, {dispatch}) => {
@@ -185,9 +182,6 @@ const eventsSlice = createSlice({
     },
   },
   extraReducers: {
-    [setFocusedEvent]: (state, action) => {
-      state.focusedEventId = action.payload.id
-    },
     [addEvent.pending]: (state, action) => {
       let event = asGoogleEvent(action.meta.arg, action.meta.requestId)
       let responseTz = state.responseTz
@@ -202,7 +196,8 @@ const eventsSlice = createSlice({
         }
       }
 
-      let allConflicts = new Set()
+      // let allConflicts = new Set()
+      // TODO extract logic for adding a new event
       let start = toMillis(event, 'start')
       let end = toMillis(event, 'end')
       event.start.ms = start;
@@ -212,6 +207,7 @@ const eventsSlice = createSlice({
       event.placeholderForAdding = true
       eventsAdapter.addOne(state, event)
     },
+
     [addEvent.fulfilled]: (state, action) => {
       let event = action.payload
       let responseTz = state.responseTz
@@ -246,10 +242,9 @@ const eventsSlice = createSlice({
       state.intervalTree = IntervalTree.insert(interval, state.intervalTree)
 
       Array.from(allConflicts).forEach(interval => {
-        let conflicts = Object.keys(
-          IntervalTree.queryIntersection(interval.range, state.intervalTree)
-        )
-        state.conflicts[interval.id] = conflicts
+        let conflicts = IntervalTree.queryIntersection(interval.range, state.intervalTree)
+        delete conflicts[interval.id]
+        state.conflicts[interval.id] = Object.keys(conflicts)
       })
       eventsAdapter.removeOne(state, action.meta.requestId)
       eventsAdapter.upsertOne(state, event)
@@ -318,10 +313,9 @@ const eventsSlice = createSlice({
       })
 
       Array.from(allConflicts).forEach(interval => {
-        let conflicts = Object.keys(
-          IntervalTree.queryIntersection(interval.range, intervalTree)
-        )
-        state.conflicts[interval.id] = conflicts
+        let conflicts = IntervalTree.queryIntersection(interval.range, intervalTree)
+        delete conflicts[interval.id]
+        state.conflicts[interval.id] = Object.keys(conflicts)
       })
 
       eventsAdapter.upsertMany(state, action.payload.result.items)
