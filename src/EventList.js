@@ -1,10 +1,10 @@
-import React from 'react';
+import React from 'react'
 
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
+import { makeStyles } from '@material-ui/core/styles'
+import List from '@material-ui/core/List'
 
 import Event from "./Event"
-import AddEvent from "./AddEvent";
+import AddEvent from "./AddEvent"
 
 import {eventsSelectors} from "./redux/eventsSlice"
 import { connect } from 'react-redux'
@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   inline: {
     display: 'inline',
   },
-}));
+}))
 
 
 const makeMapStateToProps = () => (state, props) => {
@@ -66,7 +66,7 @@ function EventList(props) {
         Empty
         </h3>
       </div>
-    );
+    )
 
     return (
       <div className="event-container">
@@ -80,7 +80,7 @@ function EventList(props) {
           </div>
         </div>
       </div>
-    );
+    )
 }
 
-export default EventList;
+export default EventList

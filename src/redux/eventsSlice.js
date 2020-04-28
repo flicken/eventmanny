@@ -4,9 +4,9 @@ import {
   createSlice
 } from '@reduxjs/toolkit'
 
-import { CALENDAR_ID} from "../config.js";
-import { DateTime } from "luxon";
-import chrono from "chrono-node";
+import { CALENDAR_ID} from "../config.js"
+import { DateTime } from "luxon"
+import chrono from "chrono-node"
 
 import * as IntervalTree from '@davidisaaclee/interval-tree'
 
@@ -19,16 +19,16 @@ const ensureAuthenticated = () => {
   if (!window.gapi.client) {
     const promise = new Promise(function(resolve, reject) {
       try {
-        window.gapi.load("auth2:client", resolve);
+        window.gapi.load("auth2:client", resolve)
       } catch(e) {
         reject(e)
       }
-    });
+    })
 
     return promise
-      .then(() => initClient());
+      .then(() => initClient())
   } else {
-    return initClient();
+    return initClient()
   }
 }
 
@@ -37,7 +37,7 @@ const initClient = () => {
     .init({
       discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
     })
-};
+}
 
 export const fetchEvents = createAsyncThunk(
   'events/fetchPageStatus',
@@ -80,7 +80,7 @@ export const fetchEvents = createAsyncThunk(
 const toDatetime = (components, other) => {
   if (!components) {
     if (other.date) {
-      return other;
+      return other
     } else {
       return {
         dateTime: DateTime.fromISO(other.dateTime).plus({ hours: 1 })
@@ -200,8 +200,8 @@ const eventsSlice = createSlice({
       // TODO extract logic for adding a new event
       let start = toMillis(event, 'start')
       let end = toMillis(event, 'end')
-      event.start.ms = start;
-      event.end.ms = end;
+      event.start.ms = start
+      event.end.ms = end
 
       event.status = "tentative"
       event.placeholderForAdding = true
@@ -225,8 +225,8 @@ const eventsSlice = createSlice({
       let allConflicts = new Set()
       let start = toMillis(event, 'start')
       let end = toMillis(event, 'end')
-      event.start.ms = start;
-      event.end.ms = end;
+      event.start.ms = start
+      event.end.ms = end
       let range = {
         low: start,
         high: Math.max(end - 1, start),
@@ -294,8 +294,8 @@ const eventsSlice = createSlice({
       events.forEach(event => {
         let start = toMillis(event, 'start', responseTz)
         let end = toMillis(event, 'end', responseTz)
-        event.start.ms = start;
-        event.end.ms = end;
+        event.start.ms = start
+        event.end.ms = end
         let range = {
           low: start,
           high: Math.max(end - 1, start),

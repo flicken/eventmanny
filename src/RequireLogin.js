@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
 
-import { GOOGLE_CLIENT_ID } from "./config.js";
-import { GoogleLogin, GoogleLogout } from 'react-google-login';
+import { GOOGLE_CLIENT_ID } from "./config.js"
+import { GoogleLogin, GoogleLogout } from 'react-google-login'
 import { connect } from 'react-redux'
 
 import {onLoginSuccess, onLoginFailure, onLogoutSuccess} from "./redux/sessionSlice"
 
-const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
 
 // const CALENDAR_READONLY = "https://www.googleapis.com/auth/calendar.readonly"
 const EVENTS_READONLY = "https://www.googleapis.com/auth/calendar.events.readonly"
@@ -44,7 +44,7 @@ function RequireLogin({isSignedIn, children, callback, onSuccess, onFailure, onL
           onLogoutSuccess={onLogoutSuccess}>{children}
       </GoogleLogout>
     } else {
-      return children || <></>;
+      return children || <></>
     }
   } else {
     return <GoogleLogin

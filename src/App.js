@@ -1,18 +1,18 @@
-import React from 'react';
-import './App.css';
+import React from 'react'
+import './App.css'
 
 import Home from "./Home"
 import UpdatesFilter from "./UpdatesFilter"
 
 import {parseUpdatesSince} from "./dates"
 
-import { DateTime } from "luxon";
+import { DateTime } from "luxon"
 
-import { withStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import { withStyles } from '@material-ui/core/styles'
+import Toolbar from '@material-ui/core/Toolbar'
+import AppBar from '@material-ui/core/AppBar'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
 
 import RelativeDate from "./RelativeDate"
 
@@ -26,10 +26,10 @@ import {setVisibilityFilterSince} from "./redux/visibilitySlice"
 
 import { connect } from 'react-redux'
 
-import EventList from "./EventList";
-import WithLoading from "./WithLoading";
+import EventList from "./EventList"
+import WithLoading from "./WithLoading"
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@material-ui/core/Grid'
 
 const GridWithLoading = WithLoading(Grid)
 
@@ -43,7 +43,7 @@ const useStyles = theme => ({
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
-  });
+  })
 
 const getAllVisibleEventIds = (state, location, filter) => {
   console.time('getAllVisibleEventIds')
@@ -211,7 +211,7 @@ placeholder="a week ago"
 onValidated={onValidated}/>)
 
 function InnerApp(props) {
-    const { classes, onDelete, onAdd, onLoginCallback, location} = props;
+    const { classes, onDelete, onAdd, onLoginCallback, location} = props
 
     return (<>
         <div className={classes.root}>

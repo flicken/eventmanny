@@ -19,7 +19,7 @@ const sessionSlice = createSlice({
     },
 
     onLogoutSuccess(state, action) {
-      return emptyState;
+      return emptyState
     },
 
     onLoginFailure(state, action) {

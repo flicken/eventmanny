@@ -1,6 +1,6 @@
 
-import { DateTime } from "luxon";
-import chrono from "chrono-node";
+import { DateTime } from "luxon"
+import chrono from "chrono-node"
 
 export const parseDatetime = (s) => {
   let datetimes = chrono.parse(s, new Date(), { forwardDate: false })
@@ -17,14 +17,14 @@ export const parseDatetime = (s) => {
       second: values.second
     })
   } else {
-    return undefined;
+    return undefined
   }
 }
 
 export const parseUpdatesSince = (since) => {
   let d = parseDatetime(since)
   if (!d) {
-    return false;
+    return false
   }
 
   let now = new DateTime({})
@@ -42,5 +42,5 @@ export const parseUpdatesSince = (since) => {
     return false
   }
 
-  return d;
+  return d
 }

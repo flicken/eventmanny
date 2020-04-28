@@ -1,18 +1,18 @@
-import React from 'react';
+import React from 'react'
 
-import { DateTime } from "luxon";
+import { DateTime } from "luxon"
 
-import { makeStyles } from '@material-ui/core/styles';
-import ListItem from '@material-ui/core/ListItem';
-import Divider from '@material-ui/core/Divider';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles'
+import ListItem from '@material-ui/core/ListItem'
+import Divider from '@material-ui/core/Divider'
+import ListItemText from '@material-ui/core/ListItemText'
+import Typography from '@material-ui/core/Typography'
 import {Link} from "react-router-dom"
 
-import Badge from '@material-ui/core/Badge';
-import EventBusy from '@material-ui/icons/Event';
-import DeleteIcon from '@material-ui/icons/Delete';
-import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
+import Badge from '@material-ui/core/Badge'
+import EventBusy from '@material-ui/icons/Event'
+import DeleteIcon from '@material-ui/icons/Delete'
+import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   inline: {
     display: 'inline',
   },
-}));
+}))
 
 
 function showTime(event) {
