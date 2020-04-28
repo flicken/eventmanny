@@ -128,7 +128,6 @@ export const deleteEvent = createAsyncThunk(
 
 const asGoogleEvent = (input, id) => {
   let datetimes = chrono.parse(input.datetimes, new Date(), { forwardDate: true })
-  console.log(datetimes)
 
   let start = toDatetime(datetimes[0].start)
   let end = toDatetime(datetimes[0].end, start)
@@ -190,44 +189,46 @@ const eventsSlice = createSlice({
       state.focusedEventId = action.payload.id
     },
     [addEvent.pending]: (state, action) => {
-      console.log("addEvent.pending")
-      console.log(action)
       let event = asGoogleEvent(action.meta.arg, action.meta.requestId)
-      console.log("Event")
-      console.log(event)
       let responseTz = state.responseTz
 
       let toMillis = (event, fieldName) => {
-        let value = event[fieldName];
-        return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
+        let value = event[fieldName]
+        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
+        if (fieldName === 'end' && value.date) {
+          return date.plus({ days: 1 }).ts
+        } else {
+          return date.ts
+        }
       }
 
       let allConflicts = new Set()
-      let start = toMillis(event, 'start', responseTz)
-      let end = toMillis(event, 'end', responseTz)
+      let start = toMillis(event, 'start')
+      let end = toMillis(event, 'end')
       event.start.ms = start;
       event.end.ms = end;
 
       event.status = "tentative"
       event.placeholderForAdding = true
       eventsAdapter.addOne(state, event)
-      console.log("Adding event")
-      console.log(action)
     },
     [addEvent.fulfilled]: (state, action) => {
-      console.log("addEvent.fulfilled")
-      console.log(action)
       let event = action.payload
       let responseTz = state.responseTz
 
       let toMillis = (event, fieldName) => {
-        let value = event[fieldName];
-        return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
+        let value = event[fieldName]
+        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
+        if (fieldName === 'end' && value.date) {
+          return date.plus({ days: 1 }).ts
+        } else {
+          return date.ts
+        }
       }
 
       let allConflicts = new Set()
-      let start = toMillis(event, 'start', responseTz)
-      let end = toMillis(event, 'end', responseTz)
+      let start = toMillis(event, 'start')
+      let end = toMillis(event, 'end')
       event.start.ms = start;
       event.end.ms = end;
       let range = {
@@ -244,7 +245,6 @@ const eventsSlice = createSlice({
 
       state.intervalTree = IntervalTree.insert(interval, state.intervalTree)
 
-      console.log(Array.from(allConflicts))
       Array.from(allConflicts).forEach(interval => {
         let conflicts = Object.keys(
           IntervalTree.queryIntersection(interval.range, state.intervalTree)
@@ -260,27 +260,16 @@ const eventsSlice = createSlice({
       state.loadStatus = "error"
     },
     [deleteEvent.pending]: (state, action) => {
-      console.log("pending")
-      console.log(state)
-      console.log(action)
       eventsAdapter.updateOne(state, {id: action.meta.arg.id, status: "cancelled"})
     },
     [deleteEvent.rejected]: (state, action) => {
-      console.log("rejected")
-      console.log(state)
-      console.log(action)
       eventsAdapter.updateOne(state, {id: action.meta.arg.id, status: "confirmed"})
     },
     [deleteEvent.fulfilled]: (state, action) => {
-      console.log("rejected")
-      console.log(state)
-      console.log(action)
       eventsAdapter.removeOne(state, action.meta.arg.id)
     },
 
     [fetchEvents.pending]: (state, action) => {
-      console.log("Starting to fetch events")
-      console.log(action)
       state.fetchEventsInProgress[calendarIdOf(action.payload)] = pageTokenOf(action.payload)
       state.loadStatus = "pending"
     },
@@ -296,8 +285,13 @@ const eventsSlice = createSlice({
       console.log(`Got ${events.length} new events`)
 
       let toMillis = (event, fieldName) => {
-        let value = event[fieldName];
-        return DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz }).ts
+        let value = event[fieldName]
+        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
+        if (fieldName === 'end' && value.date) {
+          return date.plus({ days: 1 }).ts
+        } else {
+          return date.ts
+        }
       }
 
       let allConflicts = new Set()
@@ -315,14 +309,14 @@ const eventsSlice = createSlice({
           id: event.id,
           range: range,
         }
-        let conflicts = IntervalTree.queryIntersection(range, intervalTree)
+        let conflicts = Object.values(IntervalTree.queryIntersection(range, intervalTree))
 
-        Object.values(conflicts).forEach(conflict => allConflicts.add(conflict))
+        conflicts.forEach(conflict => allConflicts.add(conflict))
+        allConflicts.add(interval)
 
         intervalTree = IntervalTree.insert(interval, intervalTree)
       })
 
-      console.log(Array.from(allConflicts))
       Array.from(allConflicts).forEach(interval => {
         let conflicts = Object.keys(
           IntervalTree.queryIntersection(interval.range, intervalTree)

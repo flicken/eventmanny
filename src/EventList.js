@@ -32,7 +32,6 @@ const makeMapStateToProps = () => (state, props) => {
 
 const ConnectedEvent = connect(makeMapStateToProps)(Event)
 
-
 function EventList(props) {
 
     const classes = useStyles()
@@ -44,11 +43,10 @@ function EventList(props) {
       onClick,
       onDelete,
       onAdd,
-      focusedEvent
+      focusedEvent,
+      showLink,
     } = props
-    console.log("EventList")
-    console.log(props)
-
+    
     let eventsList = <div>
      {ids.length} / {eventCount} events shown
        <List className={classes.root}>
@@ -60,6 +58,7 @@ function EventList(props) {
                  key={id}
                  eventId={id}
                  selected={selected}
+                 showLink={showLink}
                  onClick={onClick}
                  onDelete={onDelete}/ >
       )

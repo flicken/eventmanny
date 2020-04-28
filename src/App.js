@@ -16,7 +16,7 @@ import Tab from '@material-ui/core/Tab';
 
 import RequireLogin from "./RequireLogin"
 
-import { BrowserRouter, Route, Link, Switch} from "react-router-dom"
+import { BrowserRouter, Route, Link, Switch, NavLink} from "react-router-dom"
 import { withRouter } from "react-router"
 
 import { GoogleLogout } from 'react-google-login';
@@ -48,70 +48,87 @@ const useStyles = theme => ({
   },
   });
 
-const getVisibleEventIds = (state, location, filter) => {
+const getAllVisibleEventIds = (state, location, filter) => {
 
   let recent = parseUpdatesSince(filter.since)
-  console.log(`Recent ${recent}`)
-  console.log("Visible events")
-  console.log(state)
-  console.log(location.pathname)
 
+  let left;
   switch (location.pathname) {
     case "/new":
-      console.log(`Filtering new since ${filter.since}`)
-      return eventsSelectors.selectAll(state).filter(e =>
+      left = eventsSelectors.selectAll(state).filter(e =>
         DateTime.fromISO(e.created).diff(recent).valueOf() > 0
       ).map(e => e.id)
+      break
 
     case "/updates":
       let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
-      console.log(`Filtering updates since ${filter.since} through ${startOfNextMonth}`)
-      return eventsSelectors.selectAll(state).filter(e =>
+      left = eventsSelectors.selectAll(state).filter(e =>
           DateTime.fromISO(e.updated).diff(recent).valueOf() > 0 &&
           DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
         ).map(e => e.id)
+        break
 
     case "/conflicts":
-      console.log(`Filtering conflicts`)
-      console.log(state.events.conflicts)
       let conflicts = new Set(Object.keys(state.events.conflicts))
-      return state.events.ids.filter(id => conflicts.has(id))
+      left = state.events.ids.filter(id => conflicts.has(id))
+      break
 
     default:
-      console.log("Returning all events for " + location.pathname)
-      return state.events.ids
+      left = state.events.ids
+      break
   }
+
+  let right
+  switch (location.hash) {
+    case "conflicts":
+    case "":
+      let allConflicts = new Set(left.flatMap(id =>
+        state.events.conflicts[id] || []
+      ))
+      left.forEach(id => allConflicts.delete(id))
+      right = Array.from(allConflicts)
+      break
+
+    default:
+      let hash = location.hash?.substring(1)
+      let id = eventsSelectors.selectById(state, hash)?.id
+      let conflicts = state.events.conflicts[id]
+      right = conflicts ? conflicts : []
+  }
+
+  return {left, right}
 }
 
 const mapStateToProps = (state, props) => {
+  console.log("Map state to props")
+  const {left, right} = getAllVisibleEventIds(state, props.location, state.visibilityFilter)
     return {
-      eventIds: getVisibleEventIds(state, props.location, state.visibilityFilter),
+      eventIds: left,
+      rightIds: right,
       totalEventCount: eventsSelectors.selectTotal(state),
       since: state.visibilityFilter.since,
-      focusedEventId: state.events.focusedEventId,
+      focusedEventId: props.location.hash?.substring(1),
       isSignedIn: state.session.isSignedIn,
       signInError: state.session.signInError,
       loading: !state.events.atLeastOneFetched,
     }
 }
 
+const leftEventsMapStateToProps = (state, props) => {
+
+}
 
 
 function InnerApp(props) {
     const { location, classes, store, eventIds, eventsCount, totalEventCount,
-      focusedEvent, focusedTitle, since,
-      isSignedIn, signInError} = props;
+      focusedEventId, focusedTitle, since,
+      isSignedIn, signInError, rightIds} = props;
 
     const eventHandlers = {
       onDelete: (e, event) => {
         console.log("onDelete")
         console.log(event)
         store.dispatch(deleteEvent(event))
-      },
-      onClick: (e, event) => {
-        console.log("onClick")
-        console.log(event)
-        store.dispatch(setFocusedEvent(event))
       },
       onAdd: (e) => {
         store.dispatch(addEvent(e))
@@ -127,7 +144,6 @@ function InnerApp(props) {
 
     let requireSignon = (children) => {
       let onSuccess = e => {
-        console.log(e)
         store.dispatch(onLoginSuccess({token: e.tokenObj, profile: e.profileObj}))
         store.dispatch(fetchEvents())
       }
@@ -155,7 +171,7 @@ function InnerApp(props) {
                                           alignItems:"center",
                                           justifyContent:"center"
                                       }}
-                                      component={Link}
+                                      component={NavLink}
                                       to={path} />
               )
             }
@@ -180,13 +196,15 @@ function InnerApp(props) {
               </Home>
             </Route>
             <Route path='/'>
+
               {requireSignon(<GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3}>
                <Grid item xs={6}>
                       <EventList
                         {...eventHandlers}
                         ids={eventIds}
+                        showLink={true}
                         eventCount={totalEventCount}
-                        focusedEvent={focusedEvent}
+                        focusedEventId={focusedEventId}
                         title={<UpdatesFilter title="since "
                         defaultValue={since}
                         placeholder="a week ago"
@@ -194,8 +212,8 @@ function InnerApp(props) {
                       />
                 </Grid>
                   <Grid item xs={6}>
-                    {focusedEvent &&  <EventList
-                             events={[]}
+                    {rightIds &&  <EventList
+                             ids={rightIds}
                              eventCount={totalEventCount}
                              title={focusedTitle}
                             />

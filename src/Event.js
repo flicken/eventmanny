@@ -9,6 +9,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
+import {Link} from "react-router-dom"
 
 import Badge from '@material-ui/core/Badge';
 import EventBusy from '@material-ui/icons/Event';
@@ -53,12 +54,20 @@ function ConflictsBadge({conflicts}) {
  </Badge>
 }
 
-export default function Event({event, conflicts, onClick, onDelete, selected}) {
+function MaybeLink({hash, children}) {
+  if (hash) {
+    return <Link to={{hash: `#${hash}`}}>{children}</Link>
+  } else {
+    return <>{children}</>
+  }
+}
+
+export default function Event({event, conflicts, onClick, onDelete, selected, showLink}) {
   const classes = useStyles()
 
   return (
     <React.Fragment>
-  <ListItem button selected={selected} component="a" alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
+  <ListItem button selected={selected} to={showLink && {hash: event.id}} component={showLink ? Link : "a"} alignItems="flex-start" onClick={(e)=>onClick && onClick(e, event)}>
   <ListItemAvatar>
     <Avatar alt={event.summary} src="doesnotexist.jpg" />
   </ListItemAvatar>
