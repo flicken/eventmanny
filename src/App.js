@@ -21,7 +21,8 @@ import RequireLogin from "./RequireLogin"
 import { BrowserRouter, Route, Switch, NavLink, useLocation} from "react-router-dom"
 import { withRouter } from "react-router"
 
-import {addEvent, deleteEvent, fetchEvents, eventsSelectors} from "./redux/eventsSlice"
+import {addEvent, deleteEvent, fetchEventsFromAllCalendars, eventsSelectors} from "./redux/eventsSlice"
+import {calendarsSelectors} from "./redux/calendarsSlice"
 import {setVisibilityFilterSince} from "./redux/visibilitySlice"
 
 import { connect } from 'react-redux'
@@ -116,8 +117,8 @@ const getAllVisibleEventIds = (state, location, filter) => {
 }
 
 const mapStateToProps = (state, props) => {
-  console.log("Map state to props")
     return {
+      calendars: calendarsSelectors.selectAll(state),
       focusedEventId: props.location.hash?.substring(1),
       loading: !state.events.atLeastOneFetched,
     }
@@ -152,14 +153,14 @@ const RightEventList = withRouter(connect(rightEventsMapStateToProps)(EventList)
 const mapDispatchToProps = (dispatch) => {
   return {
     onDelete: (e, event) => {
-      console.log("onDelete")
-      console.log(event)
       dispatch(deleteEvent(event))
     },
     onAdd: e => {
       dispatch(addEvent(e))
     },
-    onLoginCallback: () => dispatch(fetchEvents())
+    onLoginCallback: () => {
+      dispatch(fetchEventsFromAllCalendars())
+    },
   }
 }
 function MyTabs({tabs}) {
@@ -211,7 +212,7 @@ placeholder="a week ago"
 onValidated={onValidated}/>)
 
 function InnerApp(props) {
-    const { classes, onDelete, onAdd, onLoginCallback, location} = props
+    const { classes, onDelete, onAdd, onLoginCallback, location, calendars} = props
 
     return (<>
         <div className={classes.root}>
@@ -235,6 +236,12 @@ function InnerApp(props) {
               <RequireLogin>
                 <GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3}>
                  <Grid item xs={6}>
+                        <ul>
+                        {calendars.filter(c => c.selected).map( calendar => {
+                          return <li key={calendar.id} title={calendar.id}>{calendar.summary}</li>
+                        })
+                        }
+                        </ul>
                         <LeftEventList
                           showLink={true}
                           onDelete={onDelete}

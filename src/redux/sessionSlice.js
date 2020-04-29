@@ -10,12 +10,10 @@ const sessionSlice = createSlice({
   initialState: emptyState,
   reducers: {
     onLoginSuccess(state, action) {
-      console.log("Logged in")
-      console.log(action)
       state.isSignedIn = true
       state.signInError = null
       state.auth = action.payload
-      
+
     },
 
     onLogoutSuccess(state, action) {

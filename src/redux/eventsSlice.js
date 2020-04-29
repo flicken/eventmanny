@@ -10,12 +10,21 @@ import chrono from "chrono-node"
 
 import * as IntervalTree from '@davidisaaclee/interval-tree'
 
+import {fetchCalendarList, calendarsSelectors} from "./calendarsSlice"
+
 const eventsAdapter = createEntityAdapter({
   // Keep the "all IDs" array sorted based on start/end times
   sortComparer: (a, b) => (a, b) => a.start.ms - b.start.ms || a.end.ms - b.end.ms
 })
 
-const ensureAuthenticated = () => {
+export const ensureClient = () => {
+  const initClient = () => {
+    return window.gapi.client
+      .init({
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+      })
+  }
+
   if (!window.gapi.client) {
     const promise = new Promise(function(resolve, reject) {
       try {
@@ -32,19 +41,25 @@ const ensureAuthenticated = () => {
   }
 }
 
-const initClient = () => {
-  return window.gapi.client
-    .init({
-      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-    })
-}
+const ignoredCalendars = new Set(["addressbook#contacts@group.v.calendar.google.com"])
+
+export const fetchEventsFromAllCalendars = createAsyncThunk(
+  'events/fetchEventsFromAllCalendarsStatus',
+  async (args, {dispatch, getState}) => {
+    console.log("Starting to fetch events from all calendars")
+    return dispatch(fetchCalendarList()).then(() => Promise.all(calendarsSelectors.selectAll(getState())
+      .filter(c => c.selected)
+      .filter(c => !ignoredCalendars.has(c.id))
+      .map(c => dispatch(fetchEvents({calendarId: c.id})))))
+  }
+)
 
 export const fetchEvents = createAsyncThunk(
   'events/fetchPageStatus',
   async (args, {dispatch, getState}) => {
-    console.log("Starting to fetch events")
     let {calendarId, pageToken} = args || {}
     let id = calendarId || CALENDAR_ID
+    console.log(`Starting to fetch events from calendar ${id}`)
     let request = {
           'calendarId': id,
           'pageToken': pageToken,
@@ -54,11 +69,11 @@ export const fetchEvents = createAsyncThunk(
           'maxResults': 100,
           'orderBy': 'startTime',
           'fields': 'nextPageToken,nextSyncToken,etag,timeZone,summary'+
-                     ',items(etag,id,htmlLink,summary,description'+
-                     ',start,end,updated,created,extendedProperties)',
+                     ',items'//+'(etag,id,htmlLink,summary,description'+',start,end,updated,created,extendedProperties)'
+                     ,
           }
 
-    await ensureAuthenticated()
+    await ensureClient()
     let results = await window.gapi.client.calendar.events.list(request)
     if (results.result.nextPageToken) {
       console.log(`Got next page token ${results.result.nextPageToken} for ${id}, dispatching`)
@@ -112,12 +127,10 @@ const toDatetime = (components, other) => {
 export const deleteEvent = createAsyncThunk(
   'events/deleteEventStatus',
   async (event, {dispatch}) => {
-    console.log("deleteEvent")
-    console.log(event)
-    await ensureAuthenticated()
+    await ensureClient()
     await window.gapi.client.calendar.events.delete({
-      'calendarId': CALENDAR_ID,
-      'eventId': event.id
+      'calendarId': event.calendarId,
+      'eventId': event.eventId
     })
     return event
   }
@@ -143,10 +156,7 @@ const asGoogleEvent = (input, id) => {
 export const addEvent = createAsyncThunk(
   'events/addEventStatus',
   async (input, {dispatch}) => {
-    console.log("Add event")
-    console.log(input)
-
-    await ensureAuthenticated()
+    await ensureClient()
 
     let response = await window.gapi.client.calendar.events.insert({
       'calendarId': CALENDAR_ID,
@@ -159,6 +169,7 @@ export const addEvent = createAsyncThunk(
 
 const calendarIdOf = request => (request && request.calendarId) || CALENDAR_ID
 const pageTokenOf = request => (request && request.pageToken) || "initial"
+const idFor = event => `${event.calendarId}/${event.eventId}`
 
 const eventsSlice = createSlice({
   name: 'events',
@@ -269,15 +280,14 @@ const eventsSlice = createSlice({
       state.loadStatus = "pending"
     },
     [fetchEvents.fulfilled]: (state, action) => {
-      console.log("Events successfully fetched")
-
       let result = action.payload.result
+      let {calendarId} = action.meta.arg
       let events = result.items
       let responseTz = result.responseTz || state.responseTz
 
       let intervalTree = state.intervalTree
 
-      console.log(`Got ${events.length} new events`)
+      console.log(`Got ${events.length} new events for ${calendarId}`)
 
       let toMillis = (event, fieldName) => {
         let value = event[fieldName]
@@ -296,6 +306,10 @@ const eventsSlice = createSlice({
         let end = toMillis(event, 'end', responseTz)
         event.start.ms = start
         event.end.ms = end
+        event.eventId = event.id
+        event.calendarId = calendarId
+        event.id = idFor(event)
+
         let range = {
           low: start,
           high: Math.max(end - 1, start),
