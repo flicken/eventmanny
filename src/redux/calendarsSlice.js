@@ -1,5 +1,6 @@
 import {
   createAsyncThunk,
+  createAction,
   createEntityAdapter,
   createSlice
 } from '@reduxjs/toolkit'
@@ -9,6 +10,10 @@ import {ensureClient} from "./eventsSlice"
 const calendarListAdapter = createEntityAdapter({
 })
 
+const noteCalendar = createAction('calendars/note')
+
+export const toggleSelectedCalendar = createAction('calendars/toggleSelected')
+
 export const fetchCalendarList = createAsyncThunk(
   'events/fetchCalendarListStatus',
   async (args, {dispatch, getState}) => {
@@ -16,11 +21,14 @@ export const fetchCalendarList = createAsyncThunk(
     let request = {   pageToken }
 
     await ensureClient()
-    let results = await window.gapi.client.calendar.calendarList.list(request)
-    if (results.result.nextPageToken) {
-      dispatch(fetchCalendarList({pageToken: results.result.nextPageToken}))
+    let response = await window.gapi.client.calendar.calendarList.list(request)
+    if (response.result.nextPageToken) {
+      dispatch(fetchCalendarList({pageToken: response.result.nextPageToken}))
     }
-    return results
+    response.result.items.forEach(calendar => {
+      dispatch(noteCalendar(calendar))
+    })
+    return response
   },
   {
     condition: (args, { getState }) => {
@@ -34,6 +42,11 @@ export const fetchCalendarList = createAsyncThunk(
 
 const pageTokenOf = request => (request && request.pageToken) || "initial"
 
+export const calendarsSelectors = calendarListAdapter.getSelectors(
+  state => state.calendars
+)
+
+
 const calendarsSlice = createSlice({
   name: 'calendars',
   initialState: calendarListAdapter.getInitialState({
@@ -41,26 +54,30 @@ const calendarsSlice = createSlice({
   reducers: {
   },
   extraReducers: {
+    [toggleSelectedCalendar]: (state, action) => {
+      let id = action.payload
+      console.log("Toggling calendar", id)
+      console.log(state)
+      let calendar = state.entities[id]
+      console.log(calendar.summary, calendar.id, !calendar.selected)
+      calendar.selected = !calendar.selected
+    },
+    [noteCalendar]: (state, action) => {
+      calendarListAdapter.upsertOne(state, action)
+    },
     [fetchCalendarList.pending]: (state, action) => {
       state.fetching = pageTokenOf(action.payload)
       state.loadStatus = "pending"
     },
     [fetchCalendarList.fulfilled]: (state, action) => {
       state.fetching = null
-
-      calendarListAdapter.upsertMany(state, action.payload.result.items)
     },
     [fetchCalendarList.rejected]: (state, action) => {
       console.log("Failed to fetch calendar list")
       console.log(action)
       state.fetching = null
-      // fetchCalendarList()
     },
   },
 })
-
-export const calendarsSelectors = calendarListAdapter.getSelectors(
-  state => state.calendars
-)
 
 export default calendarsSlice

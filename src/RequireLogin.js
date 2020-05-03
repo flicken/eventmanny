@@ -35,7 +35,7 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-function RequireLogin({isSignedIn, children, callback, onSuccess, onFailure, onLogoutSuccess, showLogout}) {
+function RequireLogin({isSignedIn, children, callback, onSuccess, onFailure, onLogoutSuccess, showLogin, showLogout}) {
   if (isSignedIn) {
     if (showLogout) {
       return <GoogleLogout
@@ -47,7 +47,7 @@ function RequireLogin({isSignedIn, children, callback, onSuccess, onFailure, onL
       return children || <></>
     }
   } else {
-    return <GoogleLogin
+    return showLogin ? <GoogleLogin
         clientId={GOOGLE_CLIENT_ID}
         buttonText="Login"
         onSuccess={e => {onSuccess(e); callback && callback(e)}}
@@ -56,7 +56,8 @@ function RequireLogin({isSignedIn, children, callback, onSuccess, onFailure, onL
         scope = {SCOPES}
         discoveryDocs = {DISCOVERY_DOCS}
         cookiePolicy={'single_host_origin'}
-      />
+      /> : null
   }
 }
+
 export default connect(mapStateToProps, mapDispatchToProps)(RequireLogin)

@@ -28,7 +28,9 @@ import {setVisibilityFilterSince} from "./redux/visibilitySlice"
 import { connect } from 'react-redux'
 
 import EventList from "./EventList"
+import CalendarList from "./CalendarList"
 import WithLoading from "./WithLoading"
+import Agenda from "./Agenda"
 
 import Grid from '@material-ui/core/Grid'
 
@@ -47,15 +49,16 @@ const useStyles = theme => ({
   })
 
 const getAllVisibleEventIds = (state, location, filter) => {
-  console.time('getAllVisibleEventIds')
-
   let recent = parseUpdatesSince(filter.since)
+  let selectedCalendarIds = new Set(calendarsSelectors.selectAll(state)
+    .filter(c => c.selected).map(c => c.id))
 
   let left
   let title
   switch (location.pathname) {
     case "/new":
       left = eventsSelectors.selectAll(state).filter(e =>
+        selectedCalendarIds.has(e.calendarId) &&
         DateTime.fromISO(e.created).diff(recent).valueOf() > 0
       ).map(e => e.id)
       title = <>newly created since <RelativeDate date={recent}/></>
@@ -64,6 +67,7 @@ const getAllVisibleEventIds = (state, location, filter) => {
     case "/updates":
       let startOfNextMonth = new DateTime({}).plus({month: 1, days: 3}).startOf("month")
       left = eventsSelectors.selectAll(state).filter(e =>
+          selectedCalendarIds.has(e.calendarId) &&
           DateTime.fromISO(e.updated).diff(recent).valueOf() > 0 &&
           DateTime.fromMillis(e.start.ms).diff(startOfNextMonth).valueOf() < 0
         ).map(e => e.id)
@@ -71,12 +75,17 @@ const getAllVisibleEventIds = (state, location, filter) => {
         break
 
     case "/conflicts":
-      left = state.events.ids.filter(id => state.events.conflicts[id]?.length)
+      left = eventsSelectors.selectAll(state).filter(e =>
+          selectedCalendarIds.has(e.calendarId) &&
+          state.events.conflicts[e.id]?.size > 0
+        ).map(e => e.id)
       title = <>(nothing selected)</>
       break
 
     default:
-      left = state.events.ids
+      left = eventsSelectors.selectAll(state).filter(e =>
+          selectedCalendarIds.has(e.calendarId)
+        ).map(e => e.id)
       title = <>all</>
       break
   }
@@ -86,9 +95,10 @@ const getAllVisibleEventIds = (state, location, filter) => {
   switch (location.hash) {
     case "conflicts":
     case "":
-      let allConflicts = new Set(left.flatMap(id =>
-        state.events.conflicts[id] || []
-      ))
+      let allConflicts = new Set()
+      left.forEach(id =>
+        (state.events.conflicts[id] || new Set()).forEach(i => allConflicts.add(i))
+      )
       left.forEach(id => allConflicts.delete(id))
       right = Array.from(allConflicts)
       if (title) {
@@ -104,7 +114,7 @@ const getAllVisibleEventIds = (state, location, filter) => {
       if (event) {
         let id = event.id
         let conflicts = state.events.conflicts[id]
-        right = conflicts ? conflicts : []
+        right = conflicts ? conflicts : new Set()
         rightTitle = `Conflicts with ${event.summary}`
       } else {
         right = []
@@ -112,13 +122,11 @@ const getAllVisibleEventIds = (state, location, filter) => {
       }
   }
 
-  console.timeEnd('getAllVisibleEventIds')
-  return {left, right, rightTitle}
+  return {left, right: Array.from(right), rightTitle}
 }
 
 const mapStateToProps = (state, props) => {
     return {
-      calendars: calendarsSelectors.selectAll(state),
       focusedEventId: props.location.hash?.substring(1),
       loading: !state.events.atLeastOneFetched,
     }
@@ -153,6 +161,7 @@ const RightEventList = withRouter(connect(rightEventsMapStateToProps)(EventList)
 const mapDispatchToProps = (dispatch) => {
   return {
     onDelete: (e, event) => {
+      console.log("Deleting...", event)
       dispatch(deleteEvent(event))
     },
     onAdd: e => {
@@ -189,6 +198,7 @@ const tabs = [
   {label: "Conflicts", path: "/conflicts"},
   {label: "New", path: "/new"},
   {label: "Updates", path: "/updates"},
+  {label: "Agenda", path: "/agenda"},
 ]
 
 
@@ -212,36 +222,34 @@ placeholder="a week ago"
 onValidated={onValidated}/>)
 
 function InnerApp(props) {
-    const { classes, onDelete, onAdd, onLoginCallback, location, calendars} = props
+    const { onDelete, onAdd, onLoginCallback, location} = props
 
     return (<>
-        <div className={classes.root}>
           <AppBar position="static">
           <Toolbar>
           <MyTabs tabs={tabs}/>
           <div style={{flexGrow: 1}}/>
-              <RequireLogin showLogout={true} callback={onLoginCallback}/>
+              <RequireLogin showLogin={true} showLogout={true} callback={onLoginCallback}/>
             </Toolbar>
           </AppBar>
-          </div>
 
           <SignInError/>
           <Switch>
             <Route exact path='/'>
               <Home>
-                <RequireLogin/>
+                <RequireLogin showLogin={true}/>
               </Home>
             </Route>
+            <Route path='/agenda'>
+                    <Agenda/>
+            </Route>
             <Route path='/'>
-              <RequireLogin>
-                <GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3}>
-                 <Grid item xs={6}>
-                        <ul>
-                        {calendars.filter(c => c.selected).map( calendar => {
-                          return <li key={calendar.id} title={calendar.id}>{calendar.summary}</li>
-                        })
-                        }
-                        </ul>
+              <RequireLogin showLogin={true}>
+                <GridWithLoading className={props.classes.root} container isLoading={props.loading} spacing={3} direction="row">
+                <Grid item xs={2}>
+                    <CalendarList/>
+                </Grid>
+                 <Grid item xs={3}>
                         <LeftEventList
                           showLink={true}
                           onDelete={onDelete}
@@ -251,9 +259,9 @@ function InnerApp(props) {
                           title={<ConnectedUpdatesFilter/>}
                         />
                   </Grid>
-                    <Grid item xs={6}>
-                      <RightEventList location={location}/>
-                    </Grid>
+                  <Grid item xs={3}>
+                    <RightEventList location={location}/>
+                  </Grid>
                 </GridWithLoading>
               </RequireLogin>
             </Route>

@@ -8,13 +8,11 @@ import { CALENDAR_ID} from "../config.js"
 import { DateTime } from "luxon"
 import chrono from "chrono-node"
 
-import * as IntervalTree from '@davidisaaclee/interval-tree'
-
 import {fetchCalendarList, calendarsSelectors} from "./calendarsSlice"
 
 const eventsAdapter = createEntityAdapter({
   // Keep the "all IDs" array sorted based on start/end times
-  sortComparer: (a, b) => (a, b) => a.start.ms - b.start.ms || a.end.ms - b.end.ms
+  sortComparer: (a, b) => a.start.ms - b.start.ms || a.end.ms - b.end.ms
 })
 
 export const ensureClient = () => {
@@ -42,6 +40,7 @@ export const ensureClient = () => {
 }
 
 const ignoredCalendars = new Set(["addressbook#contacts@group.v.calendar.google.com"])
+const ignoredAccessRoles = new Set(["freeBusyReader"])
 
 export const fetchEventsFromAllCalendars = createAsyncThunk(
   'events/fetchEventsFromAllCalendarsStatus',
@@ -49,12 +48,48 @@ export const fetchEventsFromAllCalendars = createAsyncThunk(
     console.log("Starting to fetch events from all calendars")
     return dispatch(fetchCalendarList()).then(() => Promise.all(calendarsSelectors.selectAll(getState())
       .filter(c => c.selected)
+//      .filter(c => c.primary)
+      .filter(c => !ignoredAccessRoles.has(c.accessRole))
       .filter(c => !ignoredCalendars.has(c.id))
-      .map(c => dispatch(fetchEvents({calendarId: c.id})))))
+      .map(c => dispatch(fetchAllEvents({calendarId: c.id})))))
   }
 )
 
-export const fetchEvents = createAsyncThunk(
+export const fetchRecursive = createAsyncThunk(
+  'eventsRecursive',
+  async({depth}, {dispatch, getState}) => {
+    console.log(`At depth ${depth}`)
+    if (depth > 0) {
+      dispatch(fetchRecursive({depth: depth - 1}))
+    }
+    return depth
+  }
+)
+
+
+export const fetchAllEvents = createAsyncThunk(
+  'events/fetchAllEvents',
+  async ({calendarId}, {dispatch, getState}) => {
+    await ensureClient()
+
+    let pageToken = null
+    do {
+      let response = await dispatch(fetchEventsPage({calendarId, pageToken}))
+      console.log(response)
+      pageToken = response.payload.result.nextPageToken
+    } while (pageToken)
+  }
+  //,
+  // {
+  //   condition: ({calendarId}, { getState }) => {
+  //     let inProgress = getState().events.fetchEventsInProgress[calendarId]
+  //     return !inProgress
+  //   }
+  // }
+)
+
+
+export const fetchEventsPage = createAsyncThunk(
   'events/fetchPageStatus',
   async (args, {dispatch, getState}) => {
     let {calendarId, pageToken} = args || {}
@@ -73,22 +108,8 @@ export const fetchEvents = createAsyncThunk(
                      ,
           }
 
-    await ensureClient()
-    let results = await window.gapi.client.calendar.events.list(request)
-    if (results.result.nextPageToken) {
-      console.log(`Got next page token ${results.result.nextPageToken} for ${id}, dispatching`)
-      dispatch(fetchEvents({calendarId: id, pageToken: results.result.nextPageToken}))
-    } else {
-      console.log("No next page token")
-    }
-    return results
-  },
-  {
-    condition: (args, { getState }) => {
-      let {events} = getState()
-      let pageInProgress = events.fetchEventsInProgress[calendarIdOf(args)]
-      return !(pageInProgress && pageInProgress === pageTokenOf(args))
-    }
+    return ensureClient()
+      .then(() => window.gapi.client.calendar.events.list(request))
   }
 )
 
@@ -168,14 +189,52 @@ export const addEvent = createAsyncThunk(
 
 
 const calendarIdOf = request => (request && request.calendarId) || CALENDAR_ID
-const pageTokenOf = request => (request && request.pageToken) || "initial"
 const idFor = event => `${event.calendarId}/${event.eventId}`
+
+const toMillis = (event, fieldName, timeZone) => {
+  let value = event[fieldName]
+  let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || timeZone })
+  if (fieldName === 'end' && value.date) {
+    return date.plus({ days: 1 }).toMillis()
+  } else {
+    return date.toMillis()
+  }
+}
+
+let mutateEvent = (event, calendarId, timeZone) => {
+  let start = toMillis(event, 'start', timeZone)
+  let end = toMillis(event, 'end', timeZone)
+  event.start.ms = start
+  event.end.ms = end
+  event.eventId = event.id
+  event.calendarId = calendarId
+  event.id = idFor(event)
+}
+
+export const findConflicts = (events) => {
+  console.time("findConflicts")
+  let currentEvents = []
+  let conflicts = {}
+  events.forEach(e => {
+    conflicts[e.id] = new Set()
+    currentEvents = currentEvents.filter(c => c.end.ms > e.start.ms)
+
+    currentEvents.forEach(c => {
+        conflicts[c.id] = conflicts[c.id].add(e.id)
+        conflicts[e.id] = conflicts[e.id].add(c.id)
+    })
+
+    currentEvents.push(e)
+  })
+  console.timeEnd ("findConflicts")
+
+  return conflicts
+}
 
 const eventsSlice = createSlice({
   name: 'events',
   initialState: eventsAdapter.getInitialState({
     loading: 'not-asked',
-    intervalTree: IntervalTree.empty,
     conflicts: {},
     fetchEventsInProgress: {},
   }),
@@ -217,6 +276,7 @@ const eventsSlice = createSlice({
       event.status = "tentative"
       event.placeholderForAdding = true
       eventsAdapter.addOne(state, event)
+
     },
 
     [addEvent.fulfilled]: (state, action) => {
@@ -233,32 +293,13 @@ const eventsSlice = createSlice({
         }
       }
 
-      let allConflicts = new Set()
       let start = toMillis(event, 'start')
       let end = toMillis(event, 'end')
       event.start.ms = start
       event.end.ms = end
-      let range = {
-        low: start,
-        high: Math.max(end - 1, start),
-      }
-      let interval = {
-        id: event.id,
-        range: range,
-      }
-      let conflicts = IntervalTree.queryIntersection(range, state.intervalTree)
-
-      Object.values(conflicts).forEach(conflict => allConflicts.add(conflict))
-
-      state.intervalTree = IntervalTree.insert(interval, state.intervalTree)
-
-      Array.from(allConflicts).forEach(interval => {
-        let conflicts = IntervalTree.queryIntersection(interval.range, state.intervalTree)
-        delete conflicts[interval.id]
-        state.conflicts[interval.id] = Object.keys(conflicts)
-      })
       eventsAdapter.removeOne(state, action.meta.requestId)
       eventsAdapter.upsertOne(state, event)
+
   },
   [addEvent.rejected]: (state, action) => {
       console.log("Failed to add event")
@@ -275,73 +316,43 @@ const eventsSlice = createSlice({
       eventsAdapter.removeOne(state, action.meta.arg.id)
     },
 
-    [fetchEvents.pending]: (state, action) => {
-      state.fetchEventsInProgress[calendarIdOf(action.payload)] = pageTokenOf(action.payload)
-      state.loadStatus = "pending"
+    [fetchAllEvents.pending]: (state, action) => {
+      state.fetchEventsInProgress[calendarIdOf(action.payload)] = true
     },
-    [fetchEvents.fulfilled]: (state, action) => {
-      let result = action.payload.result
-      let {calendarId} = action.meta.arg
-      let events = result.items
-      let responseTz = result.responseTz || state.responseTz
+    [fetchAllEvents.fulfilled]: (state, action) => {
+      delete state.fetchEventsInProgress[calendarIdOf(action.payload)]
+    },
+    [fetchAllEvents.rejected]: (state, action) => {
+      let calendarId = calendarIdOf(action.payload)
+      console.log(`Fetch all events failed ${calendarId}`)
+      console.log(action)
+      delete state.fetchEventsInProgress[calendarIdOf(action.payload)]
+    },
+    [fetchEventsPage.fulfilled]: (state, action) => {
+      let calendarId = calendarIdOf(action.payload)
+      console.log(`Got ${action.payload.result.items.length} new events for ${calendarId}`)
+      console.log(action)
 
-      let intervalTree = state.intervalTree
+try {
+      let {items, timeZone} = action.payload.result
 
-      console.log(`Got ${events.length} new events for ${calendarId}`)
-
-      let toMillis = (event, fieldName) => {
-        let value = event[fieldName]
-        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
-        if (fieldName === 'end' && value.date) {
-          return date.plus({ days: 1 }).ts
-        } else {
-          return date.ts
-        }
-      }
-
-      let allConflicts = new Set()
-
-      events.forEach(event => {
-        let start = toMillis(event, 'start', responseTz)
-        let end = toMillis(event, 'end', responseTz)
-        event.start.ms = start
-        event.end.ms = end
-        event.eventId = event.id
-        event.calendarId = calendarId
-        event.id = idFor(event)
-
-        let range = {
-          low: start,
-          high: Math.max(end - 1, start),
-        }
-        let interval = {
-          id: event.id,
-          range: range,
-        }
-        let conflicts = Object.values(IntervalTree.queryIntersection(range, intervalTree))
-
-        conflicts.forEach(conflict => allConflicts.add(conflict))
-        allConflicts.add(interval)
-
-        intervalTree = IntervalTree.insert(interval, intervalTree)
+      items.forEach (event => {
+        mutateEvent(event, calendarId, timeZone)
       })
 
-      Array.from(allConflicts).forEach(interval => {
-        let conflicts = IntervalTree.queryIntersection(interval.range, intervalTree)
-        delete conflicts[interval.id]
-        state.conflicts[interval.id] = Object.keys(conflicts)
-      })
+      eventsAdapter.upsertMany(state, items)
 
-      eventsAdapter.upsertMany(state, action.payload.result.items)
-
+      state.conflicts = findConflicts(eventsAdapter.getSelectors().selectAll(state))
       state.fetchEventsInProgress[calendarIdOf(action.payload)] = null
       state.loadStatus = "success"
       state.atLeastOneFetched = true
-      state.intervalTree = intervalTree
-      state.responseTz = responseTz
+    } catch(e) {
+      console.log(e)
+    }
     },
-    [fetchEvents.rejected]: (state, action) => {
-      console.log("Failed to fetch events")
+    [fetchEventsPage.rejected]: (state, action) => {
+      let calendarId = calendarIdOf(action.payload)
+      console.log(`Fetch all events failed ${calendarId}`)
       console.log(action)
       state.fetchEventsInProgress[calendarIdOf(action.payload)] = null
     },

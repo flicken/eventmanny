@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-function showTime(event) {
+export function showTime(event) {
   if (event.start.date) {
     return "All day"
   } else {
@@ -46,8 +46,14 @@ function DeleteButton(props) {
   return <DeleteIcon {...props} onClick={handleClick} />
 }
 
-function ConflictsBadge({conflicts}) {
-  return <Badge badgeContent={conflicts.length} max={99} color="primary">
+function ConflictsBadge({count}) {
+  return <Badge badgeContent={count}
+                anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+                max={99}
+                color="primary">
    <EventBusy />
  </Badge>
 }
@@ -63,7 +69,6 @@ export default function Event({event, conflicts, onClick, onDelete, selected, sh
     component={showLink ? Link : "a"}
     alignItems="flex-start"
     onClick={(e)=>onClick && onClick(e, event)}>
-    {conflicts && conflicts.length > 0 && <ConflictsBadge conflicts={conflicts}/>}
     <ListItemText
       primary={event.summary}
       secondary={
@@ -80,7 +85,8 @@ export default function Event({event, conflicts, onClick, onDelete, selected, sh
         </React.Fragment>
       }
     />
-    { (event.status === "cancelled") ? <HourglassEmptyIcon/> : (onDelete && <DeleteButton event={event} onClick={onDelete}/>)}
+    {conflicts && conflicts.size > 0 && <ConflictsBadge count={conflicts.size}/>}
+    { (event.status === "cancelled") ? <HourglassEmptyIcon/> : (onDelete && <DeleteButton event={event} onClick={(e,event) => {e.preventDefault(); onDelete(e, event)}}/>)}
 
   </ListItem>
   <Divider />

@@ -1,12 +1,17 @@
 import { combineReducers } from 'redux'
 
-import { configureStore } from "@reduxjs/toolkit"
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit"
 
 import eventsSlice from './eventsSlice'
 import visibilityFilter from './visibilitySlice'
 import sessionSlice from './sessionSlice'
 import calendarsSlice from "./calendarsSlice"
 
+import { batchedSubscribe } from 'redux-batched-subscribe';
+
+import debounce from 'lodash.debounce';
+
+const debounceNotify = debounce(notify => notify())
 
 const reducers = combineReducers({
   events: eventsSlice.reducer,
@@ -15,6 +20,13 @@ const reducers = combineReducers({
   session: sessionSlice.reducer,
 })
 
+const customizedMiddleware = getDefaultMiddleware({
+  serializableCheck: false,
+  immutableCheck: false,
+})
+
 export default configureStore({
    reducer: reducers,
+   middleware: [...customizedMiddleware],
+   enhancers: [batchedSubscribe(debounceNotify)]
 })
