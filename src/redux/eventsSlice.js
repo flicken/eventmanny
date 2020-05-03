@@ -188,7 +188,9 @@ export const addEvent = createAsyncThunk(
 )
 
 
-const calendarIdOf = request => (request && request.calendarId) || CALENDAR_ID
+const calendarIdOf = request => {
+  return (request && request.calendarId) || CALENDAR_ID
+}
 const idFor = event => `${event.calendarId}/${event.eventId}`
 
 const toMillis = (event, fieldName, timeZone) => {
@@ -317,19 +319,19 @@ const eventsSlice = createSlice({
     },
 
     [fetchAllEvents.pending]: (state, action) => {
-      state.fetchEventsInProgress[calendarIdOf(action.payload)] = true
+      state.fetchEventsInProgress[calendarIdOf(action.meta.arg)] = true
     },
     [fetchAllEvents.fulfilled]: (state, action) => {
-      delete state.fetchEventsInProgress[calendarIdOf(action.payload)]
+      delete state.fetchEventsInProgress[calendarIdOf(action.meta.arg)]
     },
     [fetchAllEvents.rejected]: (state, action) => {
-      let calendarId = calendarIdOf(action.payload)
+      let calendarId = calendarIdOf(action.meta.arg)
       console.log(`Fetch all events failed ${calendarId}`)
       console.log(action)
-      delete state.fetchEventsInProgress[calendarIdOf(action.payload)]
+      delete state.fetchEventsInProgress[calendarIdOf(action.meta.arg)]
     },
     [fetchEventsPage.fulfilled]: (state, action) => {
-      let calendarId = calendarIdOf(action.payload)
+      let calendarId = calendarIdOf(action.meta.arg)
       console.log(`Got ${action.payload.result.items.length} new events for ${calendarId}`)
       console.log(action)
 
@@ -343,7 +345,7 @@ try {
       eventsAdapter.upsertMany(state, items)
 
       state.conflicts = findConflicts(eventsAdapter.getSelectors().selectAll(state))
-      state.fetchEventsInProgress[calendarIdOf(action.payload)] = null
+      state.fetchEventsInProgress[calendarIdOf(action.meta.arg)] = null
       state.loadStatus = "success"
       state.atLeastOneFetched = true
     } catch(e) {
@@ -351,10 +353,10 @@ try {
     }
     },
     [fetchEventsPage.rejected]: (state, action) => {
-      let calendarId = calendarIdOf(action.payload)
+      let calendarId = calendarIdOf(action.meta.arg)
       console.log(`Fetch all events failed ${calendarId}`)
       console.log(action)
-      state.fetchEventsInProgress[calendarIdOf(action.payload)] = null
+      state.fetchEventsInProgress[calendarIdOf(action.meta.arg)] = null
     },
   },
 })
