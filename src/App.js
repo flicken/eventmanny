@@ -143,6 +143,14 @@ const leftEventsMapStateToProps = (state, props) => {
 }
 
 const LeftEventList = withRouter(connect(leftEventsMapStateToProps)(EventList))
+const LeftAgenda = withRouter(connect(leftEventsMapStateToProps)(Agenda))
+
+const ConnectedAgenda = connect((state, props) => {
+  return {
+    events: eventsSelectors.selectAll(state) || [],
+  }
+})(Agenda)
+
 
 
 const rightEventsMapStateToProps = (state, props) => {
@@ -241,7 +249,7 @@ function InnerApp(props) {
               </Home>
             </Route>
             <Route path='/agenda'>
-                    <Agenda/>
+                    <ConnectedAgenda/>
             </Route>
             <Route path='/'>
               <RequireLogin showLogin={true}>

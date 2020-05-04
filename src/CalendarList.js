@@ -90,8 +90,6 @@ function CalendarList(props) {
               <IndeterminateCheckbox  disabled={true}
               {...row.getToggleRowSelectedProps()}
               onChange={(event, a) => {
-                console.log("onChange", row, event)
-                console.log(a)
                 onCalendarToggled(row.original.id)
                 row.getToggleRowSelectedProps().onChange(event)
               }}/>

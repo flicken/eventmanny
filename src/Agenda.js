@@ -24,55 +24,68 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-const mapStateToProps = () => (state, props) => {
-  return {
-    events: eventsSelectors.selectAll(state),
-  }
-}
-
 function nextDays(today, count = 40) {
   return [...Array(count).keys()].map(i => today.plus({day: i}))
 }
 
-export const eventSplitting = (events, rows, columns) => {
-  let result = { }
-  rows.forEach(row => {
-    let r = Array(columns.length)
-    columns.forEach((column, index) => r[index] = [])
-    result[row] = r
-  })
+export const splitByFilters = (events, filters) => {
+  const matchedIds = new Set()
 
-  let lastIndex = columns.length - 1
-  let regex = columns.map(c => c && new RegExp(c, "i"))
+  const matched = filters.map(f =>
+    events.filter(e => f(e) && matchedIds.add(e.id)))
 
+  return {
+    matched: matched,
+    unmatched: events.filter(e => !matchedIds.has(e.id))
+  }
+}
+
+
+export const byDate = (events) => {
+  let byDate = {}
   events.forEach(event => {
-    let eventRow = DateTime.fromMillis(event.start.ms).toISODate()
-    if (rows.includes(eventRow)) {
-      let foundIndexes = columns.flatMap((column, i) => {
-          if (column && event.summary?.search(regex[i]) !== -1) {
-          return [i]
-        } else {
-          return []
-        }
-      })
-      foundIndexes.forEach(index => {
-            result[eventRow][index].push(event)
-      })
-
-      let found = foundIndexes.length > 0
-      if (!found) {
-        result[eventRow][lastIndex].push(event)
-      }
+    let date = DateTime.fromMillis(event.start.ms).toISODate()
+    let dateArray = byDate[date]
+    if (!dateArray) {
+      dateArray = byDate[date] = []
     }
+    dateArray.push(event)
   })
-  return result
+  return byDate
 }
 
 const defaultColumns = [
-  "Alice",
-  "",
+  ""
 ]
 
+const EL = ({event}) => {
+  let recurring = event.recurringEventId	&&
+                 (event.originalStartTime.date === event.start.date) &&
+                 (event.originalStartTime.dateTime === event.start.dateTime)
+
+  return (<span style={{color: (recurring ? "#888" : "#000")}}>
+    <b>{showTime(event)}</b><br/>
+    {(event.summary||event.description||JSON.stringify(event))}<br/>
+    </span>)
+}
+
+
+const Row = ({day, filters, events, ...rest}) => {
+  const alreadyDisplayed = new Set()
+  const split = splitByFilters(events, filters)
+  const {unmatched, matched} = split
+
+  return <tr valign="top" {...rest}>
+    <th key="day">{day}</th>
+    {matched.map((columnEvents, index) => <td key={index}>
+       {columnEvents.map(event => <EL key={`${index}/${event.id}`} event={event}/>)}
+       </td>
+     )}
+     <td key="unmatched">
+        {unmatched.map(event => <EL key={`unmatched/${event.id}`} event={event}/>)}
+     </td>
+ </tr>
+}
 
 function Agenda(props, state) {
     const classes = useStyles()
@@ -83,18 +96,14 @@ function Agenda(props, state) {
     const [columns, setColumns] = useState(defaultColumns)
 
     let dom = nextDays(new DateTime({}), 40).map(d => d.toISODate())
-    let personEvents = eventSplitting(events, dom, columns)
 
-    const EL = ({event}) => {
-      let recurring = event.recurringEventId	&&
-                     (event.originalStartTime.date === event.start.date) &&
-                     (event.originalStartTime.dateTime === event.start.dateTime)
+    let eventsByDate = byDate(events)
 
-      return (<span style={{color: (recurring ? "#888" : "#000")}}>
-        <b>{showTime(event)}</b><br/>
-        {(event.summary||event.description||JSON.stringify(event))}<br/>
-        </span>)
-    }
+    let f = [...columns]
+    f.pop()
+    let filters = f
+                    .map(c => c && new RegExp(c, "i"))
+                    .map(regex => event => regex && event.summary?.search(regex) !== -1)
 
     let list = <table className={classes.root} style={{margin: "0px", textAlign: "left"}} width="100%">
        <thead>
@@ -129,13 +138,12 @@ function Agenda(props, state) {
        {
          dom.map((day, index) => {
            const even = index % 2
-
-           return <tr key={day} valign="top" style={{backgroundColor: even ? "#fff": "#f2f2f2"}}>
-           <th key="day">{day}</th>
-            {columns.map((person, index)=> <td key={index}>
-              {personEvents[day][index]?.map(event =><EL key={`${index}/${event.id}`} event={event}/>)}
-            </td>)}
-          </tr>
+           return <Row key={day}
+                     day={day}
+                     events={eventsByDate[day] || []}
+                     filters={filters}
+                     valign="top"
+                     style={{backgroundColor: even ? "#fff": "#f2f2f2"}}/>
         })
 
       }
@@ -151,10 +159,10 @@ function Agenda(props, state) {
     )
 
     return (
-            <>{events.length > 0 && list}
-            {events.length === 0 && emptyState}
+            <>{events?.length && list}
+            {events?.length === 0 && emptyState}
             </>
     )
 }
 
-export default connect(mapStateToProps)(Agenda)
+export default Agenda
