@@ -107,6 +107,7 @@ function Agenda(props, state) {
                       if (regex) {
                         return (event.summary?.search(regex) >= 0) ||
                           (event.description?.search(regex) >= 0) ||
+                          (event.location?.search(regex) >= 0) ||
                           (event.attendees?.findIndex(a => (a.displayName?.search(regex) >= 0) || (a.email?.search(regex) >= 0)) >= 0)
                       } else {
                         return false
