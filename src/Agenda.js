@@ -103,7 +103,17 @@ function Agenda(props, state) {
     f.pop()
     let filters = f
                     .map(c => c && new RegExp(c, "i"))
-                    .map(regex => event => regex && event.summary?.search(regex) !== -1)
+                    .map(regex => event => {
+                      if (regex) {
+                        return (event.summary?.search(regex) >= 0) ||
+                          (event.description?.search(regex) >= 0) ||
+                          (event.attendees?.findIndex(a => (a.displayName?.search(regex) >= 0) || (a.email?.search(regex) >= 0)) >= 0)
+                      } else {
+                        return false
+                      }
+                    })
+
+    console.log("Events with attendees", events.filter(event => event.attendees?.length))
 
     let list = <table className={classes.root} style={{margin: "0px", textAlign: "left"}} width="100%">
        <thead>
@@ -160,7 +170,7 @@ function Agenda(props, state) {
 
     return (
             <>{events?.length && list}
-            {events?.length === 0 && emptyState}
+            {(events?.length === 0) && emptyState}
             </>
     )
 }
