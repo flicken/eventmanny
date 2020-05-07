@@ -13,6 +13,11 @@ import Filter from "./components/Filter"
 
 import produce from "immer"
 
+import { useLocation, useHistory } from "react-router-dom"
+
+import debounce from 'lodash.debounce'
+
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -87,13 +92,28 @@ const Row = ({day, filters, events, ...rest}) => {
  </tr>
 }
 
+const updateSearchInURL = debounce((history, location, columns) => {
+  const search = new URLSearchParams()
+  columns.filter(c => c).forEach(c => search.append("filter", c))
+  const state = {...location, search: "?" + search.toString()}
+  history.push(state)
+}, 250)
+
+
 function Agenda(props, state) {
     const classes = useStyles()
     const {
       events,
     } = props
 
-    const [columns, setColumns] = useState(defaultColumns)
+    const location = useLocation()
+    const search = new URLSearchParams(location.search)
+    const [columns, setColumns] = useState(search.getAll('filter'))
+    const history = useHistory()
+
+    React.useEffect(() => {
+      updateSearchInURL(history, location, columns)
+    }, [history, location, columns])
 
     let dom = nextDays(new DateTime({}), 40).map(d => d.toISODate())
 

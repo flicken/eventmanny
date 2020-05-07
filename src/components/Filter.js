@@ -12,8 +12,8 @@ const Filter = ({ filter, onChange, onDelete, placeholder, onFocus, ...rest }) =
       onChange={e => {
         let v = e.target.value
         console.log("onChange", value, v)
-        setValue(v || undefined)
-        onChange(v || undefined)
+        setValue(v)
+        onChange(v)
       }}
       onBlur={e => {
         if (!e.target.value) {
