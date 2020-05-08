@@ -96,7 +96,10 @@ const updateSearchInURL = debounce((history, location, columns) => {
   const search = new URLSearchParams()
   columns.filter(c => c).forEach(c => search.append("filter", c))
   const state = {...location, search: "?" + search.toString()}
-  history.push(state)
+  if (state.search !== location.search &&
+      location.pathname === history.location.pathname) {
+    history.push(state)
+  }
 }, 250)
 
 
@@ -110,6 +113,21 @@ function Agenda(props, state) {
     const search = new URLSearchParams(location.search)
     const [columns, setColumns] = useState(search.getAll('filter'))
     const history = useHistory()
+
+    React.useEffect(() => {
+      console.log("Listening...")
+      const unlisten = history.listen((newLocation, action) => {
+        if (newLocation.pathname !== location.pathname) {
+          updateSearchInURL.cancel()
+          console.log("Cancelling updateSearchInURL due to change")
+        }
+      });
+
+      return () => {
+        updateSearchInURL.cancel()
+        unlisten()
+      }
+    }, [])
 
     React.useEffect(() => {
       updateSearchInURL(history, location, columns)
