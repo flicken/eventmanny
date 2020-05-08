@@ -59,10 +59,6 @@ export const byDate = (events) => {
   return byDate
 }
 
-const defaultColumns = [
-  ""
-]
-
 const EL = ({event}) => {
   let recurring = event.recurringEventId	&&
                  (event.originalStartTime.date === event.start.date) &&
@@ -115,11 +111,9 @@ function Agenda(props, state) {
     const history = useHistory()
 
     React.useEffect(() => {
-      console.log("Listening...")
       const unlisten = history.listen((newLocation, action) => {
         if (newLocation.pathname !== location.pathname) {
           updateSearchInURL.cancel()
-          console.log("Cancelling updateSearchInURL due to change")
         }
       });
 
@@ -138,9 +132,8 @@ function Agenda(props, state) {
     let eventsByDate = byDate(events)
 
     let f = [...columns]
-    f.pop()
     let filters = f
-                    .map(c => c && new RegExp(c, "i"))
+                    .map(c => c && new RegExp(c.replace(/\?/g, ''), "i"))
                     .map(regex => event => {
                       if (regex) {
                         return (event.summary?.search(regex) >= 0) ||
@@ -152,35 +145,30 @@ function Agenda(props, state) {
                       }
                     })
 
-    console.log("Events with attendees", events.filter(event => event.attendees?.length))
 
+    const columnsToShow = [...columns, ""]
     let list = <table className={classes.root} style={{margin: "0px", textAlign: "left"}} width="100%">
        <thead>
        <tr>
           <th key="day" style={{minWidth: "100px"}} width="10%" >Day</th>
-        {columns.map((column, index) => <th key={`column-${index}`}
+        {columnsToShow.map((column, index) => <th key={`column-${index}`}
         width="15%">
         <Filter key={`filter-${index}`}
          filter={column}
-          autoFocus={index === 0}
+         autoFocus={index === 0}
          onChange={v => {
-           setColumns(produce(columns, draftColumns => {
-               draftColumns[index] = v
-           }))
-         }}
-         onDelete={() => {
-           setColumns(produce(columns, draftColumns => {
-               draftColumns.splice(index, 1)
-           }))
-         }}
-         onFocus={() => {
-           if (index === (columns.length - 1)) {
+           if (index === columns.length) {
              setColumns(produce(columns, draftColumns => {
-                 draftColumns.push("")
+                 draftColumns.push(v)
+             }))
+           } else {
+             setColumns(produce(columns, draftColumns => {
+                 draftColumns[index] = v
              }))
            }
          }}
-      /></th>)}
+      />
+      </th>)}
       </tr>
       </thead>
       <tbody>
