@@ -26,6 +26,10 @@ export const fetchCalendarList = createAsyncThunk(
       dispatch(fetchCalendarList({pageToken: response.result.nextPageToken}))
     }
     response.result.items.forEach(calendar => {
+      if (calendar.summaryOverride) {
+        calendar.originalSummary = calendar.summary
+        calendar.summary = calendar.summaryOverride
+      }
       dispatch(noteCalendar(calendar))
     })
     return response
