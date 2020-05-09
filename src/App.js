@@ -31,6 +31,9 @@ import EventList from "./EventList"
 import CalendarList from "./CalendarList"
 import WithLoading from "./WithLoading"
 import Agenda from "./Agenda"
+import Schedules from "./Schedules"
+import EventTable from "./EventTable"
+
 
 import Grid from '@material-ui/core/Grid'
 
@@ -250,6 +253,12 @@ function InnerApp(props) {
             </Route>
             <Route path='/agenda'>
                     <ConnectedAgenda/>
+            </Route>
+            <Route path='/table'>
+                  <EventTable/>
+            </Route>
+            <Route path='/schedules'>
+                  <Schedules/>
             </Route>
             <Route path='/'>
               <RequireLogin showLogin={true}>

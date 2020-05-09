@@ -6,6 +6,7 @@ import eventsSlice from './eventsSlice'
 import visibilityFilter from './visibilitySlice'
 import sessionSlice from './sessionSlice'
 import calendarsSlice from "./calendarsSlice"
+import schedulesSlice from './schedulesSlice'
 
 import { batchedSubscribe } from 'redux-batched-subscribe';
 
@@ -18,6 +19,7 @@ const reducers = combineReducers({
   calendars: calendarsSlice.reducer,
   visibilityFilter: visibilityFilter,
   session: sessionSlice.reducer,
+  schedules: schedulesSlice,
 })
 
 const customizedMiddleware = getDefaultMiddleware({

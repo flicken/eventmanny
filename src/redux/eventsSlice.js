@@ -187,6 +187,51 @@ export const addEvent = createAsyncThunk(
   }
 )
 
+export function getPrivateExtendedProperty(event, name) {
+  const p = event.extendedProperties?.private
+  if (p) {
+    return p[name]
+  } else {
+    return undefined
+  }
+}
+
+async function setPrivateExtendedProperty(event, privateExtendedProperties) {
+  await ensureClient()
+
+  const extendedProperties = {
+    ...event.extendedProperties,
+    'private': {
+      ...event.extendedProperties?.private,
+      ...privateExtendedProperties
+    }
+  }
+  let response = await window.gapi.client.calendar.events.patch({
+    'calendarId': event.calendarId,
+    'eventId': event.eventId,
+    'resource': {
+      extendedProperties
+    }
+  })
+  return response.result
+}
+
+export const addEventToSchedule = createAsyncThunk(
+  'events/addEventToScheduleStatus',
+  async ({event, schedule, ...input}, {dispatch}) => {
+    console.log("Starting to add event to schedule", event, schedule, input)
+    return setPrivateExtendedProperty(event, {'ems': schedule})
+  }
+)
+
+export const removeEventFromSchedule = createAsyncThunk(
+  'events/removeEventFromScheduleStatus',
+  async ({event, schedule, ...input}, {dispatch}) => {
+    console.log("Starting to remove event from schedule", event, schedule, input)
+    return setPrivateExtendedProperty(event, {'ems': null}, dispatch)
+  }
+)
+
 
 const calendarIdOf = request => {
   return (request && request.calendarId) || CALENDAR_ID

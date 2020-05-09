@@ -5,18 +5,22 @@ import { useTable,
   useRowSelect,
 
 } from 'react-table'
-import { FixedSizeList } from 'react-window'
+import { List, CellMeasurer, CellMeasurerCache, ArrowKeyStepper, AutoSizer } from 'react-virtualized'
 
 import Event from "./Event"
-
-import {useWhyDidYouUpdate} from 'use-why-did-you-update'
 
 import GlobalFilter from "./components/GlobalFilter"
 import IndeterminateCheckbox from "./components/IndeterminateCheckbox"
 
-function Table({ columns, data, title, classes }) {
+import {eventsSelectors, addEventToSchedule, removeEventFromSchedule} from "./redux/eventsSlice"
 
-  // Use the state and functions returned from useTable to build your UI
+import { connect } from 'react-redux'
+
+function Table({ columns, data, title, classes }) {
+  const cache = React.useMemo(() => new CellMeasurerCache({
+    fixedWidth: true,
+    defaultHeight: 100
+  }), [])
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -24,6 +28,8 @@ function Table({ columns, data, title, classes }) {
     }),
     []
   )
+
+  const [scrollState, setScrollState] = React.useState({scrollToColumn: 0, scrollToRow: 0})
 
   const {
     getTableProps,
@@ -34,8 +40,8 @@ function Table({ columns, data, title, classes }) {
     prepareRow,
     setGlobalFilter,
     selectedFlatRows,
+    state: { selectedRowIds, globalFilter },
     state,
-    state: { selectedRowIds },
   } = useTable(
     {
       columns,
@@ -74,19 +80,30 @@ function Table({ columns, data, title, classes }) {
     },
   )
 
-  const RenderRow = React.useCallback(
-    ({ index, style }) => {
+  const rowRenderer = React.useCallback(
+    ({ index, isScrolling, key, style, parent }) => {
       const row = rows[index]
       prepareRow(row)
-
       return (
+          <CellMeasurer
+            key={key}
+            cache={cache}
+            parent={parent}
+            columnIndex={0}
+            rowIndex={index}
+          >
         <div
+          key={key} style={style}
           {...row.getRowProps({
             style,
           })}
           className="tr"
+          onClick={() =>
+              setScrollState({
+                scrollToColumn: 0,
+                scrollToRow: index,
+              })}
         >
-
           {row.cells.map(cell => {
             prepareRow(row)
             return (
@@ -96,6 +113,7 @@ function Table({ columns, data, title, classes }) {
             )
           })}
         </div>
+        </CellMeasurer>
       )
     },
     [prepareRow, rows, selectedRowIds]
@@ -107,51 +125,52 @@ function Table({ columns, data, title, classes }) {
     <div className="event-container">
     <h4>{title}</h4>
     <div {...getTableProps()} className="table">
-      <GlobalFilter
-        globalFilter={state.globalFilter}
-        setGlobalFilter={setGlobalFilter}
-      />
       <div>
-        {headers.map(header => (
-          <div {...header.getHeaderProps()} className="tr">
+        {headers.filter(h => h.isVisible).map(header => {
+          if (header.id === "event") {
+            return <GlobalFilter className="tr"
+                      globalFilter={globalFilter}
+                      setGlobalFilter={setGlobalFilter}
+                    />
+          } else {
+          return  (<div {...header.getHeaderProps()} className="tr">
             {header.render('Header')}
-          </div>
-        ))}
+          </div>)
+          }
+      })}
       </div>
 
       <div {...getTableBodyProps()}>
-        <FixedSizeList
+      <ArrowKeyStepper
+        columnCount={1}
+        isControlled={true}
+        onScrollToChange={setScrollState}
+        mode={"cells"}
+        rowCount={100}
+        scrollToColumn={scrollState.scrollToColumn}
+        scrollToRow={scrollState.scrollToRow}>
+        {({onSectionRendered, scrollToColumn, scrollToRow}) => (
+          <List
           className={classes?.root}
-          height={1000}
-          itemCount={rows.length}
-          itemSize={100}
-          width={totalColumnsWidth}
-        >
-          {calendars.map(calendar => RenderRow(calendar))}
-        </FixedSizeList>
+            rowCount={rows.length}
+            width={totalColumnsWidth}
+            height={600}
+            deferredMeasurementCache={cache}
+            rowHeight={cache.rowHeight}
+            rowRenderer={args => rowRenderer({scrollToRow, scrollToColumn, ...args})}
+            overscanRowCount={3}
+            onSectionRendered={onSectionRendered}
+            scrollToColumn={scrollToColumn}
+            scrollToRow={scrollToRow}
+          />)}
+        </ArrowKeyStepper>
       </div>
     </div>
-    <p>Selected Rows: {Object.keys(selectedRowIds).length}</p>
-    <pre>
-      <code>
-        {JSON.stringify(
-          {
-            selectedRowIds: selectedRowIds,
-            'selectedFlatRows[].original': selectedFlatRows.map(
-              d => d.original
-            ),
-          },
-          null,
-          2
-        )}
-      </code>
-    </pre>
     </div>
   )
 }
 
 function EventTable(props) {
-  useWhyDidYouUpdate('EventTable', props)
   const columns = React.useMemo(
     () => [
       {
@@ -169,8 +188,30 @@ function EventTable(props) {
   )
 
   return (
-      <Table columns={columns} data={props.events} />
+      <Table columns={columns} data={props.events}/>
   )
 }
 
-export default EventTable
+const mapStateToProps = (state) => {
+  const isOnSchedule = e => e.extendedProperties?.private?.ems?.includes("Brian - Chor")
+
+  const events = eventsSelectors.selectAll(state)
+  // .filter(e =>
+  //       e.summary.includes("Brian - Chor")
+  //     ).filter(e => !isOnSchedule(e))
+  // const scheduleIds = eventsSelectors.selectAll(state).filter(isOnSchedule).map(e => e.id)
+  return {
+    events: events,
+  }
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+      onClick: (event, schedule) =>
+          dispatch(addEventToSchedule({event, schedule})),
+      removeFromSchedule: (event, schedule) =>
+        dispatch(removeEventFromSchedule({event, schedule})),
+  }
+}
+const ConnectedEventTable = connect(mapStateToProps, mapDispatchToProps)(EventTable)
+
+export default ConnectedEventTable

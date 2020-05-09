@@ -53,7 +53,7 @@ function EventList(props) {
                  key={id}
                  eventId={id}
                  showLink={showLink}
-                 onClick={onClick}
+                 onCl ick={onClick}
                  onDelete={onDelete}/ >
       )
     })}
