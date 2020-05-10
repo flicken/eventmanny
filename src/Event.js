@@ -62,7 +62,7 @@ export default function Event({event, conflicts, onClick, onDelete, selected, sh
   const classes = useStyles()
 
   return (
-    <React.Fragment>
+    <>
   <ListItem button
     selected={selected}
     to={showLink && {hash: event.id}}
@@ -90,7 +90,7 @@ export default function Event({event, conflicts, onClick, onDelete, selected, sh
 
   </ListItem>
   <Divider />
-  </React.Fragment>
+  </>
 
   )
 }

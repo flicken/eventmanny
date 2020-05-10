@@ -33,7 +33,7 @@ import WithLoading from "./WithLoading"
 import Agenda from "./Agenda"
 import Schedules from "./Schedules"
 import EventTable from "./EventTable"
-
+import Dnd from "./Dnd"
 
 import Grid from '@material-ui/core/Grid'
 
@@ -154,6 +154,15 @@ const ConnectedAgenda = connect((state, props) => {
   }
 })(Agenda)
 
+const dndEventsMapStateToProps = (state, props) => {
+
+  return {
+    events: eventsSelectors.selectAll(state),
+  }
+}
+
+const ConnectedDnd = connect(dndEventsMapStateToProps)(Dnd)
+
 
 
 const rightEventsMapStateToProps = (state, props) => {
@@ -259,6 +268,9 @@ function InnerApp(props) {
             </Route>
             <Route path='/schedules'>
                   <Schedules/>
+            </Route>
+            <Route path='/dnd'>
+                  <ConnectedDnd/>
             </Route>
             <Route path='/'>
               <RequireLogin showLogin={true}>
