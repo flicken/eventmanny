@@ -1,5 +1,6 @@
 Event Manny
 ===========
+![](https://github.com/flicken/eventmanny/workflows/Node.js%20CI/badge.svg)
 
 Bring a bit of structure to your chaotic schedule.
 
