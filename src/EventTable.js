@@ -5,7 +5,7 @@ import { useTable,
   useRowSelect,
 
 } from 'react-table'
-import { List, CellMeasurer, CellMeasurerCache, ArrowKeyStepper, AutoSizer } from 'react-virtualized'
+import { List, CellMeasurer, CellMeasurerCache, ArrowKeyStepper } from 'react-virtualized'
 
 import Event from "./Event"
 
@@ -39,9 +39,7 @@ function Table({ columns, data, title, classes }) {
     totalColumnsWidth,
     prepareRow,
     setGlobalFilter,
-    selectedFlatRows,
-    state: { selectedRowIds, globalFilter },
-    state,
+    state: { globalFilter },
   } = useTable(
     {
       columns,
@@ -116,7 +114,7 @@ function Table({ columns, data, title, classes }) {
         </CellMeasurer>
       )
     },
-    [prepareRow, rows, selectedRowIds]
+    [prepareRow, rows, cache]
   )
 
 
@@ -193,7 +191,7 @@ function EventTable(props) {
 }
 
 const mapStateToProps = (state) => {
-  const isOnSchedule = e => e.extendedProperties?.private?.ems?.includes("Brian - Chor")
+  // const isOnSchedule = e => e.extendedProperties?.private?.ems?.includes("Brian - Chor")
 
   const events = eventsSelectors.selectAll(state)
   // .filter(e =>

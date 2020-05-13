@@ -5,9 +5,6 @@ import { makeStyles } from '@material-ui/core/styles'
 
 import { DateTime } from "luxon"
 
-import {eventsSelectors} from "./redux/eventsSlice"
-import { connect } from 'react-redux'
-
 import {showTime} from "./Event"
 import Filter from "./components/Filter"
 
@@ -72,7 +69,6 @@ const EL = ({event}) => {
 
 
 const Row = ({day, filters, events, ...rest}) => {
-  const alreadyDisplayed = new Set()
   const split = splitByFilters(events, filters)
   const {unmatched, matched} = split
 
@@ -121,7 +117,7 @@ function Agenda(props, state) {
         updateSearchInURL.cancel()
         unlisten()
       }
-    }, [])
+    }, []) // eslint-disable-line  react-hooks/exhaustive-deps
 
     React.useEffect(() => {
       updateSearchInURL(history, location, columns)

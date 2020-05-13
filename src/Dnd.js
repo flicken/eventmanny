@@ -1,5 +1,5 @@
 // @flow
-import React, { useState } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import 'react-virtualized/styles.css'
 import { WindowScroller,
@@ -12,13 +12,10 @@ import {
   Droppable,
   Draggable,
   DragDropContext,
-  type DroppableProvided,
-  type DraggableProvided,
-  type DraggableStateSnapshot,
-  type DraggableRubric,
-  type DropResult,
 } from 'react-beautiful-dnd'
-import Event from './Event'
+import Event from "./Event"
+import {eventsSelectors} from "./redux/eventsSlice"
+import { connect } from 'react-redux'
 
 import styled from '@emotion/styled'
 import { colors } from '@atlaskit/theme'
@@ -96,6 +93,16 @@ const eventColors = {
   soft: "#FF6347"
 }
 
+
+const makeMapStateToProps = () => (state, props) => {
+  return {
+    event: eventsSelectors.selectById(state, props.eventId),
+    conflicts: state.events?.conflicts[props.eventId],
+  }
+}
+
+const ConnectedEvent = connect(makeMapStateToProps)(Event)
+
 function DraggableEvent({
   event,
   isDragging,
@@ -126,11 +133,11 @@ function DraggableEvent({
     data-index={index}
     aria-label={`event ${event.summary}`}
   >
-   <Event event={event}/>
+   <ConnectedEvent eventId={event.id}/>
   </Container>
 }
 
-function Dnd({events, ...props}) {
+function Dnd({events, schedules, ...props}) {
   function onDragEnd(result) {
     console.log("onDragEnd", result)
     // if (result. )
@@ -138,7 +145,8 @@ function Dnd({events, ...props}) {
 
   const cache = React.useMemo(() => new CellMeasurerCache({
     fixedWidth: true,
-    defaultHeight: 125
+    defaultHeight: 125,
+    events: events,
   }), [events])
 
   const rowRenderer = React.useCallback(
@@ -146,7 +154,7 @@ function Dnd({events, ...props}) {
       const event = events[index]
 
       return (
-            <Draggable draggableId={event.id} index={index} key={event.id} type="event">
+            <Draggable draggableId={event.id} index={index} key={event.id}>
               {(provided, snapshot) => (
                 <CellMeasurer
                   key={key}
@@ -167,21 +175,16 @@ function Dnd({events, ...props}) {
           </Draggable>
       )
     },
-    [events]
+    [events, cache]
   )
 
-
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-    <Droppable
-      droppableId="schedule"
-      mode="virtual"
-      type="event"
-      renderClone={(
-        provided,
-        snapshot,
-        rubric,
-      ) => (
+  const droppableProps = {
+    mode: "virtual",
+    renderClone: (
+      provided,
+      snapshot,
+      rubric,
+    ) => (
         <DraggableEvent
           provided={provided}
           isDragging={snapshot.isDragging}
@@ -189,31 +192,30 @@ function Dnd({events, ...props}) {
           style={{ margin: 0 }}
           index={rubric.source.index}
         />
-      )}
-    >
-    {(droppableProvided) => (
-      <div ref={(ref) => {
-        console.log("Getting ref", ref)
-        // react-virtualized has no way to get the list's ref that I can find
-        // so we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
-        if (ref) {
-          const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref)
-          console.log("whatHasMyLifeComeTo", whatHasMyLifeComeTo)
+      ),
+  }
 
-          if (whatHasMyLifeComeTo instanceof HTMLElement) {
-            console.log("setting ref", whatHasMyLifeComeTo)
-            droppableProvided.innerRef(whatHasMyLifeComeTo)
-          }
-        }
-      }}>
-        Drop me here!<br/>
-        Drop me here!<br/>
-        Drop me here!<br/>
-        Drop me here!<br/>
-        Drop me here!<br/>
-      </div>
-    )}
-    </Droppable>
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <ul>
+         {schedules.map(schedule => {
+           return (<Droppable
+              {...droppableProps}
+              droppableId = {`schedule/${schedule.id}`}
+              >
+              {(provided, snapshot) => (
+                  <div
+                     ref={provided.innerRef}
+                     style={{ backgroundColor: snapshot.isDraggingOver ? 'blue' : 'grey' }}
+                     {...provided.droppableProps}
+                     >
+                     <li key={schedule.id}>{schedule.name}</li>
+               </div>
+             )}
+             </Droppable>)
+           })}
+    </ul>
+
       <Droppable
         droppableId="droppable"
         isDropDisabled={true}
@@ -226,7 +228,7 @@ function Dnd({events, ...props}) {
           <DraggableEvent
             provided={provided}
             isDragging={snapshot.isDragging}
-            event={events[rubric.source.index]}
+            event={{...events[rubric.source.index], summary: "Dragging..."}}
             style={{ margin: 0 }}
             index={rubric.source.index}
           />

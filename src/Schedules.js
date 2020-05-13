@@ -1,36 +1,11 @@
 import React from 'react'
 
-import {useState} from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-
-import { DateTime } from "luxon"
-
 import {eventsSelectors, addEventToSchedule, removeEventFromSchedule} from "./redux/eventsSlice"
 import { connect } from 'react-redux'
 
-import {showTime} from "./Event"
 import EventList from "./EventList"
-import Filter from "./components/Filter"
-
-import produce from "immer"
-
-import { useLocation, useHistory } from "react-router-dom"
-
-import debounce from 'lodash.debounce'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    backgroundColor: theme.palette.background.paper,
-  },
-  inline: {
-    display: 'inline',
-  },
-}))
 
 function Schedules({ids, scheduleIds, onClick, removeFromSchedule, ...props}) {
-    const classes = useStyles()
-
     return (<><EventList
                 ids = {ids}
                 showLink={true}

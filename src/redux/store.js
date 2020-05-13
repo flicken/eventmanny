@@ -19,7 +19,7 @@ const reducers = combineReducers({
   calendars: calendarsSlice.reducer,
   visibilityFilter: visibilityFilter,
   session: sessionSlice.reducer,
-  schedules: schedulesSlice,
+  schedules: schedulesSlice.reducer,
 })
 
 const customizedMiddleware = getDefaultMiddleware({

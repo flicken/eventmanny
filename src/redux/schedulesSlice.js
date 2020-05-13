@@ -1,11 +1,9 @@
 import {
-  createAsyncThunk,
-  createAction,
   createEntityAdapter,
   createSlice
 } from '@reduxjs/toolkit'
 
-import {ensureClient,
+import {
   fetchEventsPage,
   addEventToSchedule,
   removeEventFromSchedule,
@@ -13,8 +11,6 @@ import {ensureClient,
 
 const schedulesAdapter = createEntityAdapter({
 })
-
-const noteSchedule = createAction('calendars/note')
 
 export const schedulesSelectors = schedulesAdapter.getSelectors(
   state => state.schedules
@@ -44,11 +40,14 @@ const schedulesSlice = createSlice({
       items.forEach (event => {
         const schedule = getPrivateExtendedProperty(event, 'ems')
         if (schedule) {
-          schedule.add(schedule)
+          schedules.add(schedule)
         }
       })
 
-      schedulesAdapter.upsertMany(state, schedules.values().map(s => {return {id: s, name: s}}))
+      if (schedules.size > 0) {
+        schedulesAdapter.upsertMany(state,  Array.from(schedules).map(s => {return {id: s, name: s}}))
+        schedulesAdapter.upsertMany(state,  ["Example 1", "Example 2", "Example 3"].map(s => {return {id: s, name: s}}))
+      }
     },
   },
 })

@@ -13,9 +13,6 @@ import { useTable,
 import GlobalFilter from "./components/GlobalFilter"
 import IndeterminateCheckbox from "./components/IndeterminateCheckbox"
 
-const drawerWidth = 240;
-
-
 const rolePriority = {
   owner: 1,
   writer: 2,

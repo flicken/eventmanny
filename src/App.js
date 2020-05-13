@@ -22,6 +22,7 @@ import { BrowserRouter, Route, Switch, NavLink, useLocation} from "react-router-
 import { withRouter } from "react-router"
 
 import {addEvent, deleteEvent, fetchEventsFromAllCalendars, eventsSelectors} from "./redux/eventsSlice"
+import {schedulesSelectors} from "./redux/schedulesSlice"
 import {calendarsSelectors} from "./redux/calendarsSlice"
 import {setVisibilityFilterSince} from "./redux/visibilitySlice"
 
@@ -146,7 +147,7 @@ const leftEventsMapStateToProps = (state, props) => {
 }
 
 const LeftEventList = withRouter(connect(leftEventsMapStateToProps)(EventList))
-const LeftAgenda = withRouter(connect(leftEventsMapStateToProps)(Agenda))
+// const LeftAgenda = withRouter(connect(leftEventsMapStateToProps)(Agenda))
 
 const ConnectedAgenda = connect((state, props) => {
   return {
@@ -158,6 +159,7 @@ const dndEventsMapStateToProps = (state, props) => {
 
   return {
     events: eventsSelectors.selectAll(state),
+    schedules: schedulesSelectors.selectAll(state),
   }
 }
 
