@@ -241,11 +241,7 @@ const idFor = event => `${event.calendarId}/${event.eventId}`
 const toMillis = (event, fieldName, timeZone) => {
   let value = event[fieldName]
   let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || timeZone })
-  if (fieldName === 'end' && value.date) {
-    return date.plus({ days: 1 }).toMillis()
-  } else {
-    return date.toMillis()
-  }
+  return date.toMillis()
 }
 
 let mutateEvent = (event, calendarId, timeZone) => {
@@ -303,20 +299,10 @@ const eventsSlice = createSlice({
       let event = asGoogleEvent(action.meta.arg, action.meta.requestId)
       let responseTz = state.responseTz
 
-      let toMillis = (event, fieldName) => {
-        let value = event[fieldName]
-        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
-        if (fieldName === 'end' && value.date) {
-          return date.plus({ days: 1 }).ts
-        } else {
-          return date.ts
-        }
-      }
-
       // let allConflicts = new Set()
       // TODO extract logic for adding a new event
-      let start = toMillis(event, 'start')
-      let end = toMillis(event, 'end')
+      let start = toMillis(event, 'start', responseTz)
+      let end = toMillis(event, 'end', responseTz)
       event.start.ms = start
       event.end.ms = end
 
@@ -330,18 +316,8 @@ const eventsSlice = createSlice({
       let event = action.payload
       let responseTz = state.responseTz
 
-      let toMillis = (event, fieldName) => {
-        let value = event[fieldName]
-        let date = DateTime.fromISO(value.dateTime || value.date, {zone: value.timeZone || responseTz })
-        if (fieldName === 'end' && value.date) {
-          return date.plus({ days: 1 }).ts
-        } else {
-          return date.ts
-        }
-      }
-
-      let start = toMillis(event, 'start')
-      let end = toMillis(event, 'end')
+      let start = toMillis(event, 'start', responseTz)
+      let end = toMillis(event, 'end', responseTz)
       event.start.ms = start
       event.end.ms = end
       eventsAdapter.removeOne(state, action.meta.requestId)
