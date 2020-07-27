@@ -6,7 +6,7 @@ import {
 
 import { CALENDAR_ID} from "../config.js"
 import { DateTime } from "luxon"
-import chrono from "chrono-node"
+import * as chrono from 'chrono-node';
 
 import {fetchCalendarList, calendarsSelectors} from "./calendarsSlice"
 

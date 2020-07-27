@@ -1,6 +1,6 @@
 
 import { DateTime } from "luxon"
-import chrono from "chrono-node"
+import * as chrono from 'chrono-node';
 
 export const parseDatetime = (s) => {
   let datetimes = chrono.parse(s, new Date(), { forwardDate: false })
