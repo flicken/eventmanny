@@ -19,7 +19,7 @@
     "react-hook-form": "^6.3.2",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.2",
+    "react-scripts": "^3.4.3",
     "react-table": "^7.5.0",
     "react-virtualized": "^9.22.2",
     "react-window": "^1.8.5",
