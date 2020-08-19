@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@atlaskit/theme@^10.0.2":
-  version "10.0.2"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-10.0.2.tgz#1a353ee00075a03835632c4cf4cb1f9fd8f1d115"
-  integrity sha512-TfzWnISbO9R9BkBpu2PD1bvGku2LqFkzhcBiJUAjWcL2E5nIt9NZIlnnCZ4A94510Lnd4B/orcghh5iid5R/LA==
+"@atlaskit/theme@^10.0.3":
+  version "10.0.3"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-10.0.3.tgz#9c1f1726e8605d1f77dca87782a8a769dfe5e122"
+  integrity sha512-FqqOTkjWbimn8ryBy+/ZIO2NdqWr8aQdsuvYH2vx1gtu+JwxXKtu7hzvSLkKijBsNBdc3q3QMG316Cn6bdAn/Q==
   dependencies:
     exenv "^1.2.2"
     prop-types "^15.5.10"
