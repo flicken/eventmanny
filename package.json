@@ -11,7 +11,7 @@
     "@reduxjs/toolkit": "^1.4.0",
     "chrono-node": "^2.1.8",
     "lodash.debounce": "^4.0.8",
-    "luxon": "^1.24.1",
+    "luxon": "^1.25.0",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",
     "react-dom": "^16.13.1",
