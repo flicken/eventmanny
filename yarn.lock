@@ -2,14 +2,14 @@
 # yarn lockfile v1
 
 
-"@atlaskit/theme@^10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-10.0.3.tgz#9c1f1726e8605d1f77dca87782a8a769dfe5e122"
-  integrity sha512-FqqOTkjWbimn8ryBy+/ZIO2NdqWr8aQdsuvYH2vx1gtu+JwxXKtu7hzvSLkKijBsNBdc3q3QMG316Cn6bdAn/Q==
+"@atlaskit/theme@^10.0.4":
+  version "10.0.4"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-10.0.4.tgz#bac6e69daf183acd0e40f99119aa8f495ce4f92a"
+  integrity sha512-yaoS4QJPIkoWzXK/Vo768i1kAwEzNtagypofiY7FBhXeH+bb09ibmY97n2sDD0V0eEepskCB0WL/b20RoC7X1g==
   dependencies:
     exenv "^1.2.2"
     prop-types "^15.5.10"
-    tslib "^1.9.3"
+    tslib "^2.0.0"
 
 "@babel/code-frame@7.8.3", "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.8.3":
   version "7.8.3"
@@ -10477,10 +10477,15 @@ ts-pnp@^1.1.6:
   resolved "https://registry.yarnpkg.com/ts-pnp/-/ts-pnp-1.2.0.tgz#a500ad084b0798f1c3071af391e65912c86bca92"
   integrity sha512-csd+vJOb/gkzvcCHgTGSChYpy5f1/XKNsmvBGO4JXS+z1v2HobugDz4s1IeFXM3wZB44uczs+eazB5Q/ccdhQw==
 
-tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
+tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.11.2"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.2.tgz#9c79d83272c9a7aaf166f73915c9667ecdde3cc9"
   integrity sha512-tTSkux6IGPnUGUd1XAZHcpu85MOkIl5zX49pO+jfsie3eP0B6pyhOlLXm3cAC6T7s+euSDDUUV+Acop5WmtkVg==
+
+tslib@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.0.1.tgz#410eb0d113e5b6356490eec749603725b021b43e"
+  integrity sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==
 
 tsutils@^3.17.1:
   version "3.17.1"
