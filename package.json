@@ -22,7 +22,7 @@
     "react-scripts": "^3.4.4",
     "react-table": "^7.5.1",
     "react-virtualized": "^9.22.2",
-    "react-window": "^1.8.5",
+    "react-window": "^1.8.6",
     "redux": "^4.0.5",
     "redux-batched-subscribe": "^0.1.6",
     "styled-components": "^5.2.1"
