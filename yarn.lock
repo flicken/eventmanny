@@ -2,14 +2,14 @@
 # yarn lockfile v1
 
 
-"@atlaskit/theme@^11.0.1":
-  version "11.0.1"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-11.0.1.tgz#6d3242381b2f5cb08e8dc724caeffcbbe63b54d7"
-  integrity sha512-DIrQwqXbgPLtu9R/eIgvnPCxxNomkyzwIYu7UEFyZI2KQynl62KHZRX9KLox07MjrhN0xB9SoMSFMwPWWayhNg==
+"@atlaskit/theme@^11.0.2":
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-11.0.2.tgz#e657763905853e23ad385ae84e5bd49c2571863e"
+  integrity sha512-1lUyifZGPBFfsTBmlsL9gRVWDS1h+75qqpWJHuMN3x9TwWs9KB5lA8yLhX5/FavNcyLIDa/GIRM4DfAilhvi5w==
   dependencies:
+    "@babel/runtime" "^7.0.0"
     exenv "^1.2.2"
     prop-types "^15.5.10"
-    tslib "^2.0.0"
 
 "@babel/code-frame@7.10.4", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.5.5":
   version "7.10.4"
@@ -11440,11 +11440,6 @@ tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.11.2"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.2.tgz#9c79d83272c9a7aaf166f73915c9667ecdde3cc9"
   integrity sha512-tTSkux6IGPnUGUd1XAZHcpu85MOkIl5zX49pO+jfsie3eP0B6pyhOlLXm3cAC6T7s+euSDDUUV+Acop5WmtkVg==
-
-tslib@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.0.1.tgz#410eb0d113e5b6356490eec749603725b021b43e"
-  integrity sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==
 
 tsutils@^3.17.1:
   version "3.17.1"
