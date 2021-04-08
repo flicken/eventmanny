@@ -9599,10 +9599,10 @@ react-google-login@5.2.2:
     "@types/react" "*"
     prop-types "^15.6.0"
 
-react-hook-form@6.14.2:
-  version "6.14.2"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-6.14.2.tgz#60ab0b5367b220a3d96aa0b17bd0f13f9d8c326a"
-  integrity sha512-GgDUuT3Yfhl1BOcMl862uAFbCixSomtm3CVlQQ1qVu9Tq5BN2uUIRUIXP8l2Gy99eLUrBqU9x4E7N+si9cnvaw==
+react-hook-form@7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.0.4.tgz#efd800289f3e6aa237fde5121f4ef7ba7653fb3b"
+  integrity sha512-4LN1bagvQPWdn17gXDo917GZLSCNtKR5Wd4D05VMnCdGkJp31mYWN7RlhQUg6tSBbIB8KqPfkmYbxET4SgAkqQ==
 
 react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
