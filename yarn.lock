@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@atlaskit/theme@11.0.2":
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-11.0.2.tgz#e657763905853e23ad385ae84e5bd49c2571863e"
-  integrity sha512-1lUyifZGPBFfsTBmlsL9gRVWDS1h+75qqpWJHuMN3x9TwWs9KB5lA8yLhX5/FavNcyLIDa/GIRM4DfAilhvi5w==
+"@atlaskit/theme@11.2.1":
+  version "11.2.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-11.2.1.tgz#28d4030d86877f2d9c71dbae20576cb698e893a6"
+  integrity sha512-KAVmnducnmEClsNOTrwgu+Fv+koDsTCP71w/RbhXe/M83xIgMsyG85GoCR3BNE6Xjx9GMSexbSdKHMK+Cxmo7w==
   dependencies:
     "@babel/runtime" "^7.0.0"
     exenv "^1.2.2"
