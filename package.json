@@ -6,6 +6,7 @@
     "@atlaskit/theme": "12.1.0",
     "@babel/helper-builder-react-jsx": "7.16.7",
     "@babel/helper-builder-react-jsx-experimental": "7.12.11",
+    "@babel/helper-define-map": "7.16.7",
     "@babel/plugin-proposal-private-property-in-object": "7.16.7",
     "@emotion/core": "11.0.0",
     "@emotion/react": "11.7.1",
@@ -32,7 +33,7 @@
     "styled-components": "5.3.3"
   },
   "devDependencies": {
-    "@babel/plugin-transform-classes": "7.12.13"
+    "@babel/plugin-transform-classes": "7.16.7"
   },
   "scripts": {
     "start": "react-scripts start",
