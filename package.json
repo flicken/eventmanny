@@ -28,6 +28,9 @@
     "redux-batched-subscribe": "0.1.6",
     "styled-components": "5.3.3"
   },
+  "devDependencies": {
+    "@babel/plugin-transform-classes": "7.12.13"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
