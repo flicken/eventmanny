@@ -3,7 +3,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 
 export default function AddEvent({onSubmit, ...props}) {
-  const summaryRef = useRef(null);
+  const summaryRef = React.useRef(null);
   const { register, handleSubmit } = useForm()
   const { ref, ...rest } = register("summary", {required: true});
 
