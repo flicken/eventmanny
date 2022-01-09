@@ -14,7 +14,7 @@ export default function AddEvent({onSubmit, ...props}) {
         ref(e);
         summaryRef.current = e;
       }}/>
-      <input name="datetimes" ref={...register("datetimes", { required: true })} placeholder="e.g. Monday, 11-12"/>
+      <input name="datetimes" {...register("datetimes", { required: true })} placeholder="e.g. Monday, 11-12"/>
       <div tabIndex="0" onFocus={(a) => {handleSubmit(onSubmit)(a); summaryRef.current.focus(); summaryRef.current.select()}}/>
     </form>
   )

@@ -17,7 +17,7 @@ export default function UpdatesFilter(props) {
           name="since"
           defaultValue={props.defaultValue}
           placeholder={props.placeholder}
-          ref={...register("since", { required: true, validate: value => parseUpdatesSince(value) && onValidated(value) })}
+          {...register("since", { required: true, validate: value => parseUpdatesSince(value) && onValidated(value) })}
           />
       {errors.since && <div style={{color:"red"}}>Invalid relative date time, try "a week ago"</div>}
     </form>
