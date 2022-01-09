@@ -13,11 +13,10 @@ export default function UpdatesFilter(props) {
   return (
     <form onSubmit={handleSubmit( onValidated)}>
       {title} <input
-          name="since"
           type="text"
           defaultValue={props.defaultValue}
           placeholder={props.placeholder}
-          ref={register({ required: true, validate: value => parseUpdatesSince(value) && onValidated(value) })}
+          ref={register("since", { required: true, validate: value => parseUpdatesSince(value) && onValidated(value) })}
           />
       {errors.since && <div style={{color:"red"}}>Invalid relative date time, try "a week ago"</div>}
     </form>
