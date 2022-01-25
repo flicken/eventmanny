@@ -9,19 +9,19 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/theme@12.1.0":
-  version "12.1.0"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.1.0.tgz#27e9188cc81f44f6e2687f1b46f43fea3420458d"
-  integrity sha512-y5J3DWykvsd69ODAgoOK0lUEDi5cuTduFQ6x17GuhaQG1LUqiBEGsHT6N6kfD11qnMnJIaofTp5uNw5Kqot+fQ==
+"@atlaskit/theme@12.1.1":
+  version "12.1.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.1.1.tgz#326fd946d4ac2dda4bd62fef9d3d4e798db70f53"
+  integrity sha512-qxcUf7zPMUYi4AwQSM7KQCazYqjoTT6gp90h6tNgNiFvuFf8YXgnkbaXCoDGaYr9pFd23Kr35Ytp9vcTZELJbA==
   dependencies:
     "@atlaskit/codemod-utils" "^3.4.0"
-    "@atlaskit/tokens" "^0.4.0"
+    "@atlaskit/tokens" "^0.5.0"
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/tokens@^0.4.0":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-0.4.1.tgz#eb297bf5c090ad961c21024ff82fe8842ccd0c23"
-  integrity sha512-bQrRhR0+j8hFDPjVGqDppYbJi/pV43XU6IhhFKGlgVxfYUWDN4I93yWqRxOzFwv1XVWZgcff5iYaDCngMacW+w==
+"@atlaskit/tokens@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-0.5.0.tgz#c89dc4bf501716da23220c28c4de1fe4bdd23a27"
+  integrity sha512-gE9A0CWojIgnhMsndJUqBz7jx0AywtQTojjliyJt6CMBnAfQcm/zcq6dDJI7kwZ1EF4tObdWZjpeqzjDeObbZw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@babel/traverse" "^7.15.0"
@@ -1225,17 +1225,18 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.16.7"
 
-"@babel/plugin-transform-classes@7.12.13":
-  version "7.12.13"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-classes/-/plugin-transform-classes-7.12.13.tgz#9728edc1838b5d62fc93ad830bd523b1fcb0e1f6"
-  integrity sha512-cqZlMlhCC1rVnxE5ZGMtIb896ijL90xppMiuWXcwcOAuFczynpd3KYemb91XFFPi3wJSe/OcrX9lXoowatkkxA==
+"@babel/plugin-transform-classes@7.16.7", "@babel/plugin-transform-classes@^7.16.7":
+  version "7.16.7"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-classes/-/plugin-transform-classes-7.16.7.tgz#8f4b9562850cd973de3b498f1218796eb181ce00"
+  integrity sha512-WY7og38SFAGYRe64BrjKf8OrE6ulEHtr5jEYaZMwox9KebgqPi67Zqz8K53EKk1fFEJgm96r32rkKZ3qA2nCWQ==
   dependencies:
-    "@babel/helper-annotate-as-pure" "^7.12.13"
-    "@babel/helper-function-name" "^7.12.13"
-    "@babel/helper-optimise-call-expression" "^7.12.13"
-    "@babel/helper-plugin-utils" "^7.12.13"
-    "@babel/helper-replace-supers" "^7.12.13"
-    "@babel/helper-split-export-declaration" "^7.12.13"
+    "@babel/helper-annotate-as-pure" "^7.16.7"
+    "@babel/helper-environment-visitor" "^7.16.7"
+    "@babel/helper-function-name" "^7.16.7"
+    "@babel/helper-optimise-call-expression" "^7.16.7"
+    "@babel/helper-plugin-utils" "^7.16.7"
+    "@babel/helper-replace-supers" "^7.16.7"
+    "@babel/helper-split-export-declaration" "^7.16.7"
     globals "^11.1.0"
 
 "@babel/plugin-transform-classes@^7.13.0":
@@ -1249,20 +1250,6 @@
     "@babel/helper-plugin-utils" "^7.13.0"
     "@babel/helper-replace-supers" "^7.13.0"
     "@babel/helper-split-export-declaration" "^7.12.13"
-    globals "^11.1.0"
-
-"@babel/plugin-transform-classes@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-classes/-/plugin-transform-classes-7.16.7.tgz#8f4b9562850cd973de3b498f1218796eb181ce00"
-  integrity sha512-WY7og38SFAGYRe64BrjKf8OrE6ulEHtr5jEYaZMwox9KebgqPi67Zqz8K53EKk1fFEJgm96r32rkKZ3qA2nCWQ==
-  dependencies:
-    "@babel/helper-annotate-as-pure" "^7.16.7"
-    "@babel/helper-environment-visitor" "^7.16.7"
-    "@babel/helper-function-name" "^7.16.7"
-    "@babel/helper-optimise-call-expression" "^7.16.7"
-    "@babel/helper-plugin-utils" "^7.16.7"
-    "@babel/helper-replace-supers" "^7.16.7"
-    "@babel/helper-split-export-declaration" "^7.16.7"
     globals "^11.1.0"
 
 "@babel/plugin-transform-computed-properties@^7.13.0":
@@ -10774,10 +10761,10 @@ react-google-login@5.2.2:
     "@types/react" "*"
     prop-types "^15.6.0"
 
-react-hook-form@7.22.5:
-  version "7.22.5"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.22.5.tgz#85a135f3c5ae02ccf73096a03fc14b45607e9baa"
-  integrity sha512-Q2zaeQFXdVQ8l3hcywhltH+Nzj4vo50wMVujHDVN/1Xy9IOaSZJwYBXA2CYTpK6rq41fnXviw3jTLb04c7Gu9Q==
+react-hook-form@7.25.0:
+  version "7.25.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.25.0.tgz#ffba58e5e14c8eeb81e2c43b741667552f11ae29"
+  integrity sha512-MyF4YXegIT/vfyZloTm98mpJwLUPfULdX37yPzXeijT1hePCkV8DN1IAnEufxgtqCpc7aFGRinegQwisUGZCnA==
 
 react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
