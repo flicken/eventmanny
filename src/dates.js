@@ -2,8 +2,8 @@
 import { DateTime } from "luxon"
 import * as chrono from 'chrono-node';
 
-export const parseDatetime = (s) => {
-  let datetimes = chrono.parse(s, new Date(), { forwardDate: false })
+export const parseDatetime = (s, now) => {
+  let datetimes = chrono.parse(s, now, { forwardDate: false })
   if (datetimes[0]) {
     let components = datetimes[0].start
 
@@ -22,20 +22,19 @@ export const parseDatetime = (s) => {
 }
 
 export const parseUpdatesSince = (since) => {
-  let d = parseDatetime(since)
+  let now = new DateTime({})
+  let d = parseDatetime(since, now)
   if (!d) {
     return false
   }
 
-  let now = new DateTime({})
-
   // try prefixing "last"
   if (d.diff(now).valueOf() > 0) {
-    d = parseDatetime("last " + since)
+    d = parseDatetime("last " + since, now)
   }
   // try suffixing "ago"
   if (d.diff(now).valueOf() > 0) {
-    d = parseDatetime(since + " ago")
+    d = parseDatetime(since + " ago", now)
   }
 
   if (d.diff(now).valueOf() > 0) {
