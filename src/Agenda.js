@@ -191,11 +191,7 @@ function Agenda(props, state) {
       </div>
     )
 
-    return (
-            <>{events?.length && list}
-            {(events?.length === 0) && emptyState}
-            </>
-    )
+    return events?.length ? list : emptyState;
 }
 
 export default Agenda
