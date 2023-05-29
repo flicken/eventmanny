@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@atlaskit/theme": "12.5.3",
+    "@atlaskit/theme": "12.5.4",
     "@babel/helper-builder-react-jsx": "7.19.0",
     "@babel/helper-builder-react-jsx-experimental": "7.12.11",
     "@babel/plugin-proposal-private-property-in-object": "7.21.0",
@@ -20,7 +20,7 @@
     "react-beautiful-dnd": "13.1.1",
     "react-dom": "18.2.0",
     "react-google-login": "5.2.2",
-    "react-hook-form": "7.44.1",
+    "react-hook-form": "7.44.2",
     "react-redux": "8.0.5",
     "react-router-dom": "5.3.4",
     "react-scripts": "5.0.1",
