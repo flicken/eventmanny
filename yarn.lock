@@ -26,30 +26,30 @@
     "@babel/runtime" "^7.0.0"
     bind-event-listener "^3.0.0"
 
-"@atlaskit/platform-feature-flags@^0.2.0":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@atlaskit/platform-feature-flags/-/platform-feature-flags-0.2.2.tgz#1227f730977165b92dd8b4f5caef10e87643b1a4"
-  integrity sha512-9wsjb1ii4t4+IWnwC/jBvWpY8/Jqng59KQH/SNEEoBifZrP4vNAH6vpv8+gPeAhFK+2Pqpxr33yC1U4+sreNew==
+"@atlaskit/platform-feature-flags@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/platform-feature-flags/-/platform-feature-flags-0.3.0.tgz#94dfa0a4ef0a140f6ab0a6de006464de925ecea7"
+  integrity sha512-/0u5fFJ0Rw2j4M5wzsXgaHO6Ey12oekPCDTRvmmAIp4GO9T2Swbl80bavLAPSOmSHMhHTSuvRxiJveZXfQ21IQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/theme@12.11.0":
-  version "12.11.0"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.11.0.tgz#0629780034eabde8861c7d05e891f5a9efed1651"
-  integrity sha512-3D1JXsnw/eyfLnEVEynapyITF01PtNeNdFuIgCcuYCx4V+kfvVDt9VxsT32uUFXbYIgZFxA8196Vwv0dyx3f7w==
+"@atlaskit/theme@12.11.1":
+  version "12.11.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.11.1.tgz#5650403e5849742fd903140c8a77bb830f08db41"
+  integrity sha512-VXn/Kc6BzVsW9bH+8RpIUGKeTN550mB1te7uUnbMiuft2PYEKgXXp63BW0kdXNVgOW/tHhLERCSboxhNmzOgWg==
   dependencies:
     "@atlaskit/codemod-utils" "^4.2.0"
     "@atlaskit/ds-lib" "^2.3.0"
-    "@atlaskit/tokens" "^1.51.0"
+    "@atlaskit/tokens" "^1.53.0"
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/tokens@^1.51.0":
-  version "1.51.0"
-  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-1.51.0.tgz#f3c36f99bd552e8a9a5d80432c98d9f659842e38"
-  integrity sha512-L88gFhh5Iu/oN/WfhWm8VBJLxSNAapQ4S6JaGmbWLTAoF7KGW8YH5n/SjPnck2LMBemtU9JWEcstUH6OLTsvtg==
+"@atlaskit/tokens@^1.53.0":
+  version "1.53.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-1.53.1.tgz#e619d239075986598db30586e7737301aecdf40f"
+  integrity sha512-Gr1R+RWVL0xlRhgMLTeCFLWULwbF74zptl9sHfsj5so0xzgbDChAqv+Ib+DjIOqhHSTAlVmOLlwcSsq6OxDviw==
   dependencies:
     "@atlaskit/ds-lib" "^2.3.0"
-    "@atlaskit/platform-feature-flags" "^0.2.0"
+    "@atlaskit/platform-feature-flags" "^0.3.0"
     "@babel/runtime" "^7.0.0"
     "@babel/traverse" "^7.23.2"
     "@babel/types" "^7.20.0"
@@ -9626,10 +9626,10 @@ react-google-login@5.2.2:
     "@types/react" "*"
     prop-types "^15.6.0"
 
-react-hook-form@7.52.0:
-  version "7.52.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.52.0.tgz#e52b33043e283719586b9dd80f6d51b68dd3999c"
-  integrity sha512-mJX506Xc6mirzLsmXUJyqlAI3Kj9Ph2RhplYhUVffeOQSnubK2uVqBFOBJmvKikvbFV91pxVXmDiR+QMF19x6A==
+react-hook-form@7.52.1:
+  version "7.52.1"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.52.1.tgz#ec2c96437b977f8b89ae2d541a70736c66284852"
+  integrity sha512-uNKIhaoICJ5KQALYZ4TOaOLElyM+xipord+Ha3crEFhTntdLvWZqVY49Wqd/0GiVCA/f9NjemLeiNPjG7Hpurg==
 
 react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
