@@ -18,13 +18,15 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/ds-lib@^2.3.0":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@atlaskit/ds-lib/-/ds-lib-2.3.1.tgz#ce57c8fabe207a5d945e26d52df898cd30d4685b"
-  integrity sha512-DVUE3hYLhdEZy4NnsxqiCqKC5Ym3CM/DGRQlnSPcABFNL0N0FfTXso3pLpkJnMZBtEnd2pn13mPJ2VQlSISRuw==
+"@atlaskit/ds-lib@^3.0.0", "@atlaskit/ds-lib@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/ds-lib/-/ds-lib-3.1.0.tgz#43955d06dee9c7ae8fcf1f5ff6695b9010751892"
+  integrity sha512-1os/bwBxDkR1bqrnuW2fZR1uAm/tncI8W55fR31GKfpzI/WgmWABzzY9MdWim2kXjR4rsE0GvfjoNMJhJvfUVQ==
   dependencies:
+    "@atlaskit/platform-feature-flags" "^0.3.0"
     "@babel/runtime" "^7.0.0"
     bind-event-listener "^3.0.0"
+    react-uid "^2.2.0"
 
 "@atlaskit/platform-feature-flags@^0.3.0":
   version "0.3.0"
@@ -33,22 +35,22 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/theme@12.11.2":
-  version "12.11.2"
-  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-12.11.2.tgz#8a83721a193edcb8f593716005b55137b251f27d"
-  integrity sha512-UNISVE31iw/KFf0oKkJbdkx4BwmUYbMPeXK+LoL2Zh/ig38W0nfX96HhOROgFUp+Rmno97R6lxYxQrHwX001mA==
+"@atlaskit/theme@13.1.0":
+  version "13.1.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/theme/-/theme-13.1.0.tgz#59f67ac754960f37cf65d4a29e2425c2fc473fd7"
+  integrity sha512-9HWU2Wf5DX1+OQKmqAeZqUPAe2BgNhyYhIlkQm2Vo8RxzvI0BDWyjafEro4MdUK8ZYqSfegd9wgk7qzIUF9ZaQ==
   dependencies:
     "@atlaskit/codemod-utils" "^4.2.0"
-    "@atlaskit/ds-lib" "^2.3.0"
-    "@atlaskit/tokens" "^1.54.0"
+    "@atlaskit/ds-lib" "^3.1.0"
+    "@atlaskit/tokens" "^2.0.0"
     "@babel/runtime" "^7.0.0"
 
-"@atlaskit/tokens@^1.54.0":
-  version "1.56.1"
-  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-1.56.1.tgz#bb3ec14a36a2afb391a9ce643401f736bd156ea3"
-  integrity sha512-QutzKSxdnLvBfokzja/ZqD0PRpv9RzYCMc35Dk3jChgzl//+MDWJvtO8Ie3IKXkOv15+oRuCHiaWbhSgVBLoRg==
+"@atlaskit/tokens@^2.0.0":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@atlaskit/tokens/-/tokens-2.0.2.tgz#65006216f2c251a16cddeb8e8daae538fafdcbcd"
+  integrity sha512-U8lAjJmAE6JVTuH7N3Dvb/O5iB0VsAktyxfKKM0XrsDfK3iB6LH+ug5EF9OwUdqyQTLkUhc0sqe7kFhgqfDotg==
   dependencies:
-    "@atlaskit/ds-lib" "^2.3.0"
+    "@atlaskit/ds-lib" "^3.0.0"
     "@atlaskit/platform-feature-flags" "^0.3.0"
     "@babel/runtime" "^7.0.0"
     "@babel/traverse" "^7.23.2"
@@ -9790,6 +9792,13 @@ react-transition-group@^4.4.0:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-uid@^2.2.0:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/react-uid/-/react-uid-2.3.3.tgz#6a485ccc868555997f3506c6db97a3e735d97adf"
+  integrity sha512-iNpDovcb9qBpBTo8iUgqRSQOS8GV3bWoNaTaUptHkXtAooXSo0OWe7vN6TqqB8x3x0bNBbQx96kkmSltQ5h9kQ==
+  dependencies:
+    tslib "^2.0.0"
+
 react-virtualized@9.22.5:
   version "9.22.5"
   resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.22.5.tgz#bfb96fed519de378b50d8c0064b92994b3b91620"
@@ -11035,6 +11044,11 @@ tslib@^1.8.1, tslib@^1.9.0:
   version "1.11.2"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.2.tgz#9c79d83272c9a7aaf166f73915c9667ecdde3cc9"
   integrity sha512-tTSkux6IGPnUGUd1XAZHcpu85MOkIl5zX49pO+jfsie3eP0B6pyhOlLXm3cAC6T7s+euSDDUUV+Acop5WmtkVg==
+
+tslib@^2.0.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.7.0.tgz#d9b40c5c40ab59e8738f297df3087bf1a2690c01"
+  integrity sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==
 
 tslib@^2.0.3:
   version "2.3.1"
